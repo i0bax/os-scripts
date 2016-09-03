@@ -715,28 +715,8 @@ timeout 300 curl --progress -k -L -f "https://dl.dropboxusercontent.com/u/111541
 #[[ $(which gnome-shell) ]] \
 #  && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"                              # GNOME - Desktop wallpaper
 
-/usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://\${wallpaper}'"                          # Change lock wallpaper (before swipe) - kali 2 & rolling
+/usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://usr/share/wallpapers/sp3nx0r_wallpaper.jpg'"                          # Change lock wallpaper (before swipe) - kali 2 & rolling
 #cp -f "\${wallpaper}" /usr/share/gnome-shell/theme/KaliLogin.png                                                 # Change login wallpaper (after swipe) - kali 2
-
-/usr/bin/xfdesktop --reload 2>/dev/null &
-EOF
-chmod -f 0500 "${file}"
-#--- Run now
-bash "${file}"
-#--- Add to startup
-mkdir -p ~/.config/autostart/
-file=~/.config/autostart/wallpaper.desktop; [ -e "${file}" ] && cp -n $file{,.bkup}
-cat <<EOF > "${file}" \
-  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
-[Desktop Entry]
-Type=Application
-Exec=/usr/local/bin/rand-wallpaper
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=wallpaper
-EOF
-
 
 ##### Configure file   Note: need to restart xserver for effect
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}file${RESET} (Nautilus/Thunar) ~ GUI file system navigation"
