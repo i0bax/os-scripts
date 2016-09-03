@@ -1,15 +1,12 @@
 #!/bin/bash
 #-Metadata----------------------------------------------------#
-#  Filename: kali-rolling.sh             (Update: 2016-04-11) #
+#  Filename: kali-rolling.sh             (Update: 2016-09-02) #
 #-Info--------------------------------------------------------#
 #  Personal post-install script for Kali Linux Rolling        #
 #-Author(s)---------------------------------------------------#
 #  g0tmilk ~ https://blog.g0tmi1k.com/                        #
 #-Operating System--------------------------------------------#
 #  Designed for: Kali Linux Rolling [x64] (VM - VMware)       #
-#     Tested on: Kali Linux 2016.1 x64/x84/full/light/mini/vm #
-#     Kali v1.x: https://g0tmi1k/os-scripts/master/kali1.sh   #
-#     Kali v2.x: https://g0tmi1k/os-scripts/master/kali2.sh   #
 #-Licence-----------------------------------------------------#
 #  MIT License ~ http://opensource.org/licenses/MIT           #
 #-Notes-------------------------------------------------------#
@@ -30,7 +27,7 @@
 #                             ---                             #
 #  Will cut it up (so modular based), when its in its repo    #
 #                             ---                             #
-#             ** This script is meant for _ME_. **            #
+#        ** This script is repurposed for Sp3nx0r_. **        #
 #         ** EDIT this to meet _YOUR_ requirements! **        #
 #-------------------------------------------------------------#
 
@@ -39,8 +36,8 @@ if [ 1 -eq 0 ]; then    # This is never true, thus it acts as block comments ;)
 ################################################################################
 ### One liner - Grab the latest version and execute! ###########################
 ################################################################################
-wget -qO kali-rolling.sh https://raw.github.com/g0tmi1k/os-scripts/master/kali-rolling.sh \
-  && bash kali-rolling.sh -burp -keyboard gb -timezone "Europe/London"
+wget -qO kali-rolling.sh https://raw.github.com/sp3nx0r/os-scripts/master/kali-rolling.sh \
+  && bash kali-rolling.sh -burp -keyboard us -timezone "America/Chicago"
 ################################################################################
 fi
 
@@ -1287,12 +1284,12 @@ grep -q '^set pastetoggle=<F9>' "${file}" 2>/dev/null \
 grep -q '^:command Q q' "${file}" 2>/dev/null \
   || echo -e ':command Q q' >> "${file}"                                                                 # Fix stupid typo I always make
 #--- Set as default editor
-export EDITOR="vim"   #update-alternatives --config editor
+export EDITOR="nano"   #update-alternatives --config editor
 file=/etc/bash.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
 grep -q '^EDITOR' "${file}" 2>/dev/null \
-  || echo 'EDITOR="vim"' >> "${file}"
-git config --global core.editor "vim"
+  || echo 'EDITOR="nano"' >> "${file}"
+git config --global core.editor "nano"
 #--- Set as default mergetool
 git config --global merge.tool vimdiff
 git config --global merge.conflictstyle diff3
@@ -1304,7 +1301,7 @@ git config --global mergetool.prompt false
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Set as default editor
-git config --global core.editor "vim"
+git config --global core.editor "nano"
 #--- Set as default mergetool
 git config --global merge.tool vimdiff
 git config --global merge.conflictstyle diff3
