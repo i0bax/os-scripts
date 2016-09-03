@@ -706,47 +706,11 @@ xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
 xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
 #--- Get new desktop wallpaper      (All are #***!!! hardcoded paths!)
 mkdir -p /usr/share/wallpapers/
-echo -n '[1/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_A.png" > /usr/share/wallpapers/kali_blue_3d_a.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_3d_a.png" 1>&2
-echo -n '[2/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_B.png" > /usr/share/wallpapers/kali_blue_3d_b.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_3d_b.png" 1>&2
-echo -n '[3/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_G.png" > /usr/share/wallpapers/kali_black_honeycomb.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_honeycomb.png" 1>&2
-echo -n '[4/10]'; timeout 300 curl --progress -k -L -f "https://lh5.googleusercontent.com/-CW1-qRVBiqc/U7ARd2T9LCI/AAAAAAAAAGw/oantfR6owSg/w1920-h1080/vzex.png" > /usr/share/wallpapers/kali_blue_splat.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_splat.png" 1>&2
-echo -n '[5/10]'; timeout 300 curl --progress -k -L -f "http://wallpaperstock.net/kali-linux_wallpapers_39530_1920x1080.jpg" > /usr/share/wallpapers/kali-linux_wallpapers_39530.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali-linux_wallpapers_39530.png" 1>&2
-echo -n '[6/10]'; timeout 300 curl --progress -k -L -f "http://em3rgency.com/wp-content/uploads/2012/12/Kali-Linux-faded-no-Dragon-small-text.png" > /usr/share/wallpapers/kali_black_clean.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_clean.png" 1>&2
-echo -n '[7/10]'; timeout 300 curl --progress -k -L -f "http://www.hdwallpapers.im/download/kali_linux-wallpaper.jpg" > /usr/share/wallpapers/kali_black_stripes.jpg \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_stripes.jpg" 1>&2
-echo -n '[8/10]'; timeout 300 curl --progress -k -L -f "http://fc01.deviantart.net/fs71/f/2011/118/e/3/bt___edb_wallpaper_by_xxdigipxx-d3f4nxv.png" > /usr/share/wallpapers/kali_bt_edb.jpg \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_bt_edb.jpg" 1>&2
-echo -n '[9/10]'; timeout 300 curl --progress -k -L -f "http://pre07.deviantart.net/58d1/th/pre/i/2015/223/4/8/kali_2_0_alternate_wallpaper_by_xxdigipxx-d95800s.png" > /usr/share/wallpapers/kali_2_0_alternate_wallpaper.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_2_0_alternate_wallpaper.png" 1>&2
-echo -n '[10/10]'; timeout 300 curl --progress -k -L -f "http://pre01.deviantart.net/4210/th/pre/i/2015/195/3/d/kali_2_0__personal__wp_by_xxdigipxx-d91c8dq.png" > /usr/share/wallpapers/kali_2_0_personal.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_2_0_personal.png" 1>&2
-_TMP="$(find /usr/share/wallpapers/ -maxdepth 1 -type f -name 'kali_*' | xargs -n1 file | grep -i 'HTML\|empty' | cut -d ':' -f1)"
-for FILE in $(echo ${_TMP}); do rm -f "${FILE}"; done
-#--- Kali 1 (Wallpaper)
-[ -e "/usr/share/wallpapers/kali_default-1440x900.jpg" ] \
-  && ln -sf /usr/share/wallpapers/kali/contents/images/1440x900.png /usr/share/wallpapers/kali_default-1440x900.jpg
-#--- Kali 2 (Login)
-[ -e "/usr/share/gnome-shell/theme/KaliLogin.png" ] \
-  && cp -f /usr/share/gnome-shell/theme/KaliLogin.png /usr/share/wallpapers/KaliLogin2.0-login.jpg
-#--- Kali 2 & Rolling (Wallpaper)
-[ -e "/usr/share/images/desktop-base/kali-wallpaper_1920x1080.png" ] \
-  && ln -sf /usr/share/images/desktop-base/kali-wallpaper_1920x1080.png /usr/share/wallpapers/kali_default2.0-1920x1080.jpg
-#--- New wallpaper & add to startup (so its random each login)
-file=/usr/local/bin/rand-wallpaper; [ -e "${file}" ] && cp -n $file{,.bkup}
-cat <<EOF > "${file}" \
-  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
-#!/bin/bash
 
-wallpaper="\$(shuf -n1 -e \$(find /usr/share/wallpapers/ -maxdepth 1 -name 'kali_*'))"
+timeout 300 curl --progress -k -L -f "https://dl.dropboxusercontent.com/u/11154144/Linux%20Wallpaper.jpg" > /usr/share/wallpapers/sp3nx0r_wallpaper.jpg
 
 /usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "\${wallpaper}"   # XFCE - Desktop wallpaper
+/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "/usr/share/wallpapers/sp3nx0r_wallpaper.jpg"   # XFCE - Desktop wallpaper
 
 #[[ $(which gnome-shell) ]] \
 #  && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"                              # GNOME - Desktop wallpaper
@@ -1309,6 +1273,10 @@ git config --global mergetool.prompt false
 #--- Set as default push
 git config --global push.default simple
 
+
+##### Setup git config for Sp3nx0r
+git config --global user.name sp3nx0r
+git config --global user.email sp3nx0r@gmail.com
 
 ##### Setup firefox
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}firefox${RESET} ~ GUI web browser"
@@ -2989,6 +2957,20 @@ apt -y -qq install backdoor-factory \
 apt -y -qq install bdfproxy \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
+##### Install backbox-anonymous script
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Backbox's Tor Redirection Script${RESET}"
+apt -y qq install tor \ 
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2 
+chmod 755 /opt/os-scripts-git/backbox-anonymous
+mv /opt/os-scripts-git/backbox-anonymous /usr/bin/backbox-anonymous
+# modify tor config file
+file=/etc/tor/torrc; [ -e "${file}" ] && cp -n $file{,.bkup}
+echo -e 'RunAsDaemon 1' >> "${file}"
+echo -e 'VirtualAddrNetwork 10.192.0.0/10' >> "${file}"
+echo -e 'AutomapHostsOnResolve 1' >> "${file}"
+echo -e 'TransPort 9040' >> "${file}"
+echo -e 'DNSPort 53' >> "${file}"
+service tor restart
 
 ##### Install BetterCap
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}BetterCap${RESET} ~ MITM framework"
@@ -3192,7 +3174,7 @@ git pull -q
 popd >/dev/null
 
 
-##### Install wig (https://bugs.kali.org/view.php?id=1932)
+##### Install wig (https://bugs.kali.org/view.php?id=1932) - WebApp Information Gatherer
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}wig${RESET} ~ web application detection"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -3207,7 +3189,7 @@ cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
 
-cd /opt/wig-git/ && python wig.py "\$@"
+cd /opt/wig-git/ && python3 wig.py "\$@"
 EOF
 chmod +x "${file}"
 
@@ -3269,7 +3251,7 @@ echo -e " ${YELLOW}[i]${RESET} Edit: /usr/share/beef-xss/config.yaml"
 #<script src="http://192.168.155.175:3000/hook.js" type="text/javascript"></script>
 
 
-##### Install patator (GIT)
+##### Install patator (GIT) - another brute forcer
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}patator${RESET} (GIT) ~ brute force"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -3289,7 +3271,7 @@ EOF
 chmod +x "${file}"
 
 
-##### Install crowbar
+##### Install crowbar - neato brute force tool
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}crowbar${RESET} ~ brute force"
 apt -y -qq install git openvpn freerdp-x11 vncviewer \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -3309,13 +3291,13 @@ EOF
 chmod +x "${file}"
 
 
-##### Install xprobe
+##### Install xprobe - fingerprinting 
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}xprobe${RESET} ~ OS fingerprinting"
 apt -y -qq install xprobe \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install p0f
+##### Install p0f firewall
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}p0f${RESET} ~ OS fingerprinting"
 apt -y -qq install p0f \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -3365,8 +3347,8 @@ source "${file}" || source ~/.zshrc
 #--- Remove from start up
 systemctl disable atftpd
 #--- Disabling IPv6 can help
-#echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
-#echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
 
 
 ##### Install Pure-FTPd
