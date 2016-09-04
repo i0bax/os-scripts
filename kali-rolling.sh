@@ -3554,7 +3554,24 @@ grep -q '^## ssh' "${file}" 2>/dev/null \
 #--- Apply new alias
 source "${file}" || source ~/.zshrc
 
+##### LazyMap
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}LazyMap${RESET} ~ automate and sort nmap"
+apt -y -qq install git \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+git clone -q -b master https://github.com/commonexploits/port-scan-automation /opt/lazymap-git \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/lazymap-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#--- Add to path
+file=/usr/local/bin/lazymap
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
 
+cd /opt/lazymap-git/ && bash lazymap.sh "\$@"
+EOF
+chmod +x "${file}"
 
 ##### Custom insert point
 
