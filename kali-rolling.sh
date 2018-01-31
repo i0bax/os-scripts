@@ -1,6 +1,6 @@
 #!/bin/bash
 #-Metadata----------------------------------------------------#
-#  Filename: kali-rolling.sh             (Update: 2016-09-02) #
+#  Filename: kali-rolling.sh             (Update: 2018-01-29) #
 #-Info--------------------------------------------------------#
 #  Personal post-install script for Kali Linux Rolling        #
 #-Author(s)---------------------------------------------------#
@@ -24,9 +24,7 @@
 #    -timezone <value> = Change the timezone location         #
 #                                                             #
 #  e.g. # bash kali-rolling.sh  -burp -openvas -keyboard gb   #
-#                             ---                             #
-#  Will cut it up (so modular based), when its in its repo    #
-#                             ---                             #
+# 															  #
 #        ** This script is repurposed for Sp3nx0r_. **        #
 #         ** EDIT this to meet _YOUR_ requirements! **        #
 #-------------------------------------------------------------#
@@ -67,7 +65,7 @@ BOLD="\033[01;01m"     # Highlight
 RESET="\033[00m"       # Normal
 
 STAGE=0                                                       # Where are we up to
-TOTAL=$(grep '(${STAGE}/${TOTAL})' $0 | wc -l);(( TOTAL-- ))  # How many things have we got todo
+TOTAL=$(grep '(${STAGE}/${TOTAL})' $0 | wc -l );(( TOTAL-- ))  # How many things have we got todo
 
 
 #-Arguments------------------------------------------------------------#
@@ -109,6 +107,8 @@ while [[ "${#}" -gt 0 && ."${1}" == .-* ]]; do
    esac
 done
 
+burpFree=True;
+##### Sp3nx0r forgets, just always install
 
 ##### Check user inputs
 if [[ -n "${timezone}" && ! -f "/usr/share/zoneinfo/${timezone}" ]]; then
@@ -217,14 +217,14 @@ else
   echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Detected Internet access${RESET}" 1>&2
 fi
 #--- GitHub under DDoS?
-(( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Checking ${GREEN}GitHub status${RESET}"
+(( STAGE++ )); echo -e " ${GREEN}[i]${RESET} (${STAGE}/${TOTAL}) Checking ${GREEN}GitHub status${RESET}"
 timeout 300 curl --progress -k -L -f "https://status.github.com/api/status.json" | grep -q "good" \
   || (echo -e ' '${RED}'[!]'${RESET}" ${RED}GitHub is currently having issues${RESET}. ${BOLD}Lots may fail${RESET}. See: https://status.github.com/" 1>&2 \
     && exit 1)
 
 
 ##### Enable default network repositories ~ http://docs.kali.org/general-use/kali-linux-sources-list-repositories
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Enabling default Kali ${GREEN}network repositories${RESET}"
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Enabling default OS ${GREEN}network repositories${RESET}"
 #--- Add network repositories
 file=/etc/apt/sources.list; [ -e "${file}" ] && cp -n $file{,.bkup}
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -252,13 +252,30 @@ fi
 ##### Check to see if Kali is in a VM. If so, install "Virtual Machine Addons/Tools" for a "better" virtual experiment
 if (dmidecode | grep -iq vmware); then
   ##### Install virtual machines tools ~ http://docs.kali.org/general-use/install-vmware-tools-kali-guest
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VMware's virtual machine tools${RESET}"
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VMware's (open) virtual machine tools${RESET}"
   apt -y -qq install open-vm-tools-desktop fuse \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   apt -y -qq install make \
-    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2    # nags afterwards
+        || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2    # There's a nags afterwards
+  ## Shared folders support for Open-VM-Tools (some odd bug)
+  file=/usr/local/sbin/mount-shared-folders; [ -e "${file}" ] && cp -n $file{,.bkup}
+  cat <<EOF > "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+
+vmware-hgfsclient | while read folder; do
+  echo "[i] Mounting \${folder}   (/mnt/hgfs/\${folder})"
+  mkdir -p "/mnt/hgfs/\${folder}"
+  umount -f "/mnt/hgfs/\${folder}" 2>/dev/null
+  vmhgfs-fuse -o allow_other -o auto_unmount ".host:/\${folder}" "/mnt/hgfs/\${folder}"
+done
+
+sleep 2s
+EOF
+  chmod +x "${file}"
+  ln -sf "${file}" /root/Desktop/mount-shared-folders.sh
 elif (dmidecode | grep -iq virtualbox); then
-  ##### Installing Virtualbox Guest Additions.   Note: Need VirtualBox 4.2.xx+ for the host (http://docs.kali.org/general-use/kali-linux-virtual-box-guest)
+ ##### Installing VirtualBox Guest Additions.   Note: Need VirtualBox 4.2.xx+ for the host (http://docs.kali.org/general-use/kali-linux-virtual-box-guest)
   (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VirtualBox's guest additions${RESET}"
   apt -y -qq install virtualbox-guest-x11 \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -332,6 +349,7 @@ else
   echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping time zone${RESET} (missing: '$0 ${BOLD}--timezone <value>${RESET}')..." 1>&2
 fi
 #--- Installing ntp tools
+(( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}ntpdate${RESET} ~ keeping the time in sync"																										   
 apt -y -qq install ntp ntpdate \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Update time
@@ -393,6 +411,8 @@ apt -y -qq install kali-linux-full \
 
 ##### Set audio level
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting ${GREEN}audio${RESET} levels"
+systemctl --user enable pulseaudio
+systemctl --user start pulseaudio						  					 
 pactl set-sink-mute 0 0
 pactl set-sink-volume 0 25%
 
@@ -454,7 +474,7 @@ fi
 export DISPLAY=:0.0
 apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin \
+apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin xfce4-power-manager \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 (dmidecode | grep -iq virtual) \
   || (apt -y -qq install xfce4-battery-plugin \
@@ -462,6 +482,7 @@ apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin \
 #--- Configuring XFCE
 mkdir -p ~/.config/xfce4/panel/launcher-{2,4,5,6,7,8,9}/
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/
+#--- Configuring XFCE (Keyboard shortcuts)							  
 cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 <?xml version="1.0" encoding="UTF-8"?>
@@ -545,6 +566,21 @@ cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.
   </property>
 </channel>
 EOF
+#--- Configuring XFCE (Power Options)
+cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+<?xml version="1.0" encoding="UTF-8"?>
+
+<channel name="xfce4-power-manager" version="1.0">
+  <property name="xfce4-power-manager" type="empty">
+    <property name="power-button-action" type="empty"/>
+    <property name="dpms-enabled" type="bool" value="true"/>
+    <property name="blank-on-ac" type="int" value="0"/>
+    <property name="dpms-on-ac-sleep" type="uint" value="0"/>
+    <property name="dpms-on-ac-off" type="uint" value="0"/>
+  </property>
+</channel>
+EOF
 #--- Desktop files
 ln -sf /usr/share/applications/exo-terminal-emulator.desktop ~/.config/xfce4/panel/launcher-2/exo-terminal-emulator.desktop
 ln -sf /usr/share/applications/kali-wireshark.desktop        ~/.config/xfce4/panel/launcher-4/kali-wireshark.desktop
@@ -599,7 +635,7 @@ xfconf-query -n -c xfce4-panel -p /plugins/plugin-5/items -t string -s "firefox-
   && xfconf-query -n -c xfce4-panel -p /plugins/plugin-6/items -t string -s "kali-burpsuite.desktop" -a
 #--- metasploit
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-7/items -t string -s "kali-msfconsole.desktop" -a
-#--- gedit/atom
+#--- gedit
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-8/items -t string -s "textedit.desktop" -a
 #--- search
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-9/items -t string -s "xfce4-appfinder.desktop" -a
@@ -704,20 +740,7 @@ timeout 300 curl --progress -k -L -f "https://dl.opendesktop.org/api/files/downl
 tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
 xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
 xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
-#--- Get new desktop wallpaper      (All are #***!!! hardcoded paths!)
-mkdir -p /usr/share/wallpapers/
-
-timeout 300 curl --progress -k -L -f "https://dl.dropboxusercontent.com/u/11154144/Linux%20Wallpaper.jpg" > /usr/share/wallpapers/sp3nx0r_wallpaper.jpg
-
 /usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "/usr/share/wallpapers/sp3nx0r_wallpaper.jpg"   # XFCE - Desktop wallpaper
-
-#[[ $(which gnome-shell) ]] \
-#  && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"                              # GNOME - Desktop wallpaper
-
-/usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://usr/share/wallpapers/sp3nx0r_wallpaper.jpg'"                          # Change lock wallpaper (before swipe) - kali 2 & rolling
-#cp -f "\${wallpaper}" /usr/share/gnome-shell/theme/KaliLogin.png                                                 # Change login wallpaper (after swipe) - kali 2
-
 ##### Configure file   Note: need to restart xserver for effect
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}file${RESET} (Nautilus/Thunar) ~ GUI file system navigation"
 #--- Settings
