@@ -12,7 +12,7 @@
 #-Notes-------------------------------------------------------#
 #  Run as root straight after a clean install of Kali Rolling #
 #                             ---                             #
-#  You will need 25GB+ free HDD space before running.         #
+#  You will need 25GB+ free HDD space before running.         # >> need to update this based on build
 #                             ---                             #
 #  Command line arguments:                                    #
 #    -burp     = Automates configuring Burp Suite (Community) #
@@ -124,10 +124,7 @@ elif [[ -n "${keyboardLayout}" && -e /usr/share/X11/xkb/rules/xorg.lst ]]; then
 fi
 
 
-#-Start----------------------------------------------------------------#
-
-
-##### Check if we are running as root - else this script will fail (hard!)
+#-Start----------------------------------------------------------------###### Check if we are running as root - else this script will fail (hard!)
 if [[ "${EUID}" -ne 0 ]]; then
   echo -e ' '${RED}'[!]'${RESET}" This script must be ${RED}run as root${RESET}" 1>&2
   echo -e ' '${RED}'[!]'${RESET}" Quitting..." 1>&2
@@ -274,34 +271,34 @@ sleep 2s
 EOF
   chmod +x "${file}"
   ln -sf "${file}" /root/Desktop/mount-shared-folders.sh
-elif (dmidecode | grep -iq virtualbox); then
-  ##### Installing VirtualBox Guest Additions.   Note: Need VirtualBox 4.2.xx+ for the host (http://docs.kali.org/general-use/kali-linux-virtual-box-guest)
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VirtualBox's guest additions${RESET}"
-  apt -y -qq install virtualbox-guest-x11 \
-    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-fi
+#elif (dmidecode | grep -iq virtualbox); then
+#  ##### Installing VirtualBox Guest Additions.   Note: Need VirtualBox 4.2.xx+ for the host (http://docs.kali.org/general-use/kali-linux-virtual-box-guest)
+#  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}VirtualBox's guest additions${RESET}"
+#  apt -y -qq install virtualbox-guest-x11 \
+#    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#fi
 
 
 ##### Check to see if there is a second Ethernet card (if so, set an static IP address)
-ip addr show eth1 &>/dev/null
-if [[ "$?" == 0 ]]; then
-  ##### Set a static IP address (192.168.155.175/24) on eth1
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting a ${GREEN}static IP address${RESET} (${BOLD}192.168.155.175/24${RESET}) on ${BOLD}eth1${RESET}"
-  ip addr add 192.168.155.175/24 dev eth1 2>/dev/null
-  route delete default gw 192.168.155.1 2>/dev/null
-  file=/etc/network/interfaces.d/eth1.cfg; [ -e "${file}" ] && cp -n $file{,.bkup}
-  grep -q '^iface eth1 inet static' "${file}" 2>/dev/null \
-    || cat <<EOF > "${file}"
-auto eth1
-iface eth1 inet static
-    address 192.168.155.175
-    netmask 255.255.255.0
-    gateway 192.168.155.1
-    post-up route delete default gw 192.168.155.1
-EOF
-else
-  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping eth1${RESET} (missing nic)..." 1>&2
-fi
+#ip addr show eth1 &>/dev/null
+#if [[ "$?" == 0 ]]; then
+#  ##### Set a static IP address (192.168.155.175/24) on eth1
+#  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting a ${GREEN}static IP address${RESET} (${BOLD}192.168.155.175/24${RESET}) on ${BOLD}eth1${RESET}"
+#  ip addr add 192.168.155.175/24 dev eth1 2>/dev/null
+#  route delete default gw 192.168.155.1 2>/dev/null
+#  file=/etc/network/interfaces.d/eth1.cfg; [ -e "${file}" ] && cp -n $file{,.bkup}
+#  grep -q '^iface eth1 inet static' "${file}" 2>/dev/null \
+#    || cat <<EOF > "${file}"
+#auto eth1
+#iface eth1 inet static
+#    address 192.168.155.175
+#    netmask 255.255.255.0
+#    gateway 192.168.155.1
+#    post-up route delete default gw 192.168.155.1
+#EOF
+#else
+#  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping eth1${RESET} (missing nic)..." 1>&2
+#fi
 
 
 ##### Set static & protecting DNS name servers.   Note: May cause issues with forced values (e.g. captive portals etc)
@@ -424,6 +421,7 @@ grubTimeout=5
 file=/etc/default/grub; [ -e "${file}" ] && cp -n $file{,.bkup}
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT='${grubTimeout}'/' "${file}"                           # Time out (lower if in a virtual machine, else possible dual booting)
 sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="vga=0x0318"/' "${file}"   # TTY resolution
+sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX_="audit=1"/' "${file}"   # grub hardening
 update-grub
 
 
@@ -1279,7 +1277,7 @@ git config --global push.default simple
 
 ##### Setup firefox
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}firefox${RESET} ~ GUI web browser"
-apt -y -qq install unzip curl firefox-esr \
+apt -y -qq install unzip firefox-esr \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Configure firefox
 export DISPLAY=:0.0
@@ -2079,7 +2077,8 @@ apt -y -qq install ipcalc sipcalc \
 
 ##### Install asciinema
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}asciinema${RESET} ~ CLI terminal recorder"
-curl -s -L https://asciinema.org/install | sh
+apt -y -qq install asciinema \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
 ##### Install shutter
@@ -2132,13 +2131,17 @@ apt -y -qq install ca-certificates \
 
 ##### Install testssl
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}testssl${RESET} ~ Testing TLS/SSL encryption"
-apt -y -qq install testssl.sh \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+git clone -q https://github.com/drwetter/testssl.sh.git /opt/testssl-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/testssl-git/ >/dev/null
+git pull -q
+popd >/dev/null
+ln -sf /usr/bin/testssl /opt/testssl-git/testssl.sh <<<<<<
 
 
 ##### Install UACScript
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}UACScript${RESET} ~ UAC Bypass for Windows 7"
-apt -y -qq install git windows-binaries \
+apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/Vozzie/uacscript.git /opt/uacscript-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -2150,7 +2153,7 @@ ln -sf /usr/share/windows-binaries/uac-win7 /opt/uacscript-git/
 
 ##### Install MiniReverse_Shell_With_Parameters
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}MiniReverse_Shell_With_Parameters${RESET} ~ Generate shellcode for a reverse shell"
-apt -y -qq install git windows-binaries \
+apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/xillwillx/MiniReverse_Shell_With_Parameters.git /opt/minireverse-shell-with-parameters-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -2181,7 +2184,7 @@ apt -y -qq install html2text \
 
 ##### Install tmux2html
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}tmux2html${RESET} ~ Render tmux as HTML"
-apt -y -qq install git python python-pip \
+apt -y -qq install python python-pip \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 pip install tmux2html
 
@@ -2282,16 +2285,10 @@ apt -y -qq install wafw00f \
 
 ##### Install aircrack-ng
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Aircrack-ng${RESET} ~ Wi-Fi cracking suite"
-apt -y -qq install aircrack-ng curl \
+apt -y -qq install aircrack-ng \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Setup hardware database
-mkdir -p /etc/aircrack-ng/
-(timeout 600 airodump-ng-oui-update 2>/dev/null) \
-  || timeout 600 curl --progress -k -L -f "http://standards-oui.ieee.org/oui/oui.txt" > /etc/aircrack-ng/oui.txt
-[ -e /etc/aircrack-ng/oui.txt ] \
-  && (\grep "(hex)" /etc/aircrack-ng/oui.txt | sed 's/^[ \t]*//g;s/[ \t]*$//g' > /etc/aircrack-ng/airodump-ng-oui.txt)
-[[ ! -f /etc/aircrack-ng/airodump-ng-oui.txt ]] \
-  && echo -e ' '${RED}'[!]'${RESET}" Issue downloading oui.txt" 1>&2
+(timeout 600 airodump-ng-oui-update 2>/dev/null) 
 #--- Setup alias
 file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -2804,8 +2801,8 @@ file=~/.local/share/applications/mimeapps.list; [ -e "${file}" ] && cp -n $file{
 echo -e 'application/x-ms-dos-executable=wine.desktop' >> "${file}"
 
 
-##### Install MinGW (Windows) ~ cross compiling suite
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}MinGW (Windows)${RESET} ~ cross compiling suite"
+##### Install Wine (Windows)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Wine (Windows)${RESET}"
 apt -y -qq install wine curl unzip \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/mingw/files/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip/download" > /tmp/mingw-get.zip \
@@ -2840,7 +2837,7 @@ apt -y -qq install curl windows-binaries unzip unrar \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://download.sysinternals.com/files/PSTools.zip" > /tmp/pstools.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pstools.zip" 1>&2
-echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://www.coresecurity.com/system/files/pshtoolkit_v1.4.rar" > /tmp/pshtoolkit.rar \
+echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "https://www.coresecurity.com/system/files/pshtoolkit_v1.4-src.rar" > /tmp/pshtoolkit.rar \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pshtoolkit.rar" 1>&2  #***!!! hardcoded path!
 unzip -q -o -d /usr/share/windows-binaries/pstools/ /tmp/pstools.zip
 unrar x -y /tmp/pshtoolkit.rar /usr/share/windows-binaries/ >/dev/null
@@ -2895,13 +2892,13 @@ ln -sf /opt/packers/ /usr/share/windows-binaries/packers
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}hyperion${RESET} ~ bypassing anti-virus"
 apt -y -qq install unzip windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+#unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
 #--- Compile
 i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
-  /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
-  -o /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe
-ln -sf /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/Hyperion-1.0/crypter.exe                                                            #***!!! hardcoded path!
-wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+  /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
+  -o /usr/share/windows-binaries/hyperion/Src/Crypter/bin/crypter.exe
+ln -sf /usr/share/windows-binaries/hyperion/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/hyperion/crypter.exe                                                            #***!!! hardcoded path!
+wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
   -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
   | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
 #--- Add to path
@@ -3282,7 +3279,7 @@ chmod +x "${file}"
 
 ##### Install crowbar - neato brute force tool
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}crowbar${RESET} ~ brute force"
-apt -y -qq install git openvpn freerdp-x11 vncviewer \
+apt -y -qq install git openvpn freerdp-x11 \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/galkan/crowbar.git /opt/crowbar-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -3390,9 +3387,9 @@ echo "/etc/pure-ftpd/welcome.msg" > /etc/pure-ftpd/conf/FortunesFile   #/etc/mot
 echo "FTP" > /etc/pure-ftpd/welcome.msg
 ln -sf /etc/pure-ftpd/conf/PureDB /etc/pure-ftpd/auth/50pure
 #--- 'Better' MOTD
-apt -y -qq install cowsay \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-echo "moo" | /usr/games/cowsay > /etc/pure-ftpd/welcome.msg
+#apt -y -qq install cowsay \
+#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+echo "Nothing to see here... " > /etc/pure-ftpd/welcome.msg
 echo -e " ${YELLOW}[i]${RESET} Pure-FTPd username: anonymous"
 echo -e " ${YELLOW}[i]${RESET} Pure-FTPd password: anonymous"
 #--- Apply settings
@@ -3566,16 +3563,17 @@ ssh-keygen -b 1024 -t dsa -f /etc/ssh/ssh_host_dsa_key -P "" >/dev/null
 ssh-keygen -b 521 -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -P "" >/dev/null
 ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -P "" >/dev/null
 #--- Change MOTD
-apt -y -qq install cowsay \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-echo "Moo" | /usr/games/cowsay > /etc/motd
+#apt -y -qq install cowsay \
+#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#echo "Moo" | /usr/games/cowsay > /etc/motd
+echo "Go away" > /etc/motd
 #--- Change SSH settings
 file=/etc/ssh/sshd_config; [ -e "${file}" ] && cp -n $file{,.bkup}
-sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/g' "${file}"      # Accept password login (overwrite Debian 8+'s more secure default option...)
+#sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/g' "${file}"      # Accept password login (overwrite Debian 8+'s more secure default option...)
 sed -i 's/^#AuthorizedKeysFile /AuthorizedKeysFile /g' "${file}"    # Allow for key based login
 #sed -i 's/^Port .*/Port 2222/g' "${file}"
 #--- Enable ssh at startup
-#systemctl enable ssh
+systemctl enable ssh
 #--- Setup alias (handy for 'zsh: correct 'ssh' to '.ssh' [nyae]? n')
 file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -3605,7 +3603,51 @@ chmod +x "${file}"
 
 ##### Custom insert point
 
+#aws shell https://github.com/awslabs/aws-shell
+#aquatone https://github.com/michenriksen/aquatone
+#theZoo https://github.com/ytisf/theZoo
+#rtfm https://github.com/leostat/rtfm
+#gittyleaks https://github.com/kootenpv/gittyleaks
+#trufflehog https://github.com/dxa4481/truffleHog
+#bloodhound https://github.com/BloodHoundAD/BloodHound
+#nmap vulners https://github.com/vulnersCom/nmap-vulners
+#arachni 
+#redsnarf https://github.com/nccgroup/redsnarf
+#sherlock https://github.com/rasta-mouse/Sherlock
+#mongoaudit https://github.com/stampery/mongoaudit
+#dbdat https://github.com/foospidy/DbDat
+#Scout2 https://github.com/nccgroup/Scout2
+#whatportis https://github.com/ncrocfer/whatportis
 
+##### Kali hardening
+
+# 3.2 /boot/grub/grub.cfg chmod 400
+
+# 7.1.2 net.ipv4.conf.all.send_redirects net.ipv4.conf.default.send_redirects net.ipv4.conf.default.accept_source_route net.ipv4.conf.all.accept_redirects net.ipv4.conf.default.accept_redirects net.ipv4.conf.all.secure_redirects net.ipv4.conf.default.secure_redirects net.ipv4.conf.all.log_martians net.ipv4.conf.default.log_martians net.ipv4.conf.all.rp_filter net.ipv4.conf.default.rp_filter net.ipv6.conf.all.accept_ra net.ipv6.conf.default.accept_ra net.ipv6.conf.all.accept_redirects net.ipv6.conf.default.accept_redirects
+
+# 7.3.3 ipv6 disable waived 
+# 8.1.2 auditd configured
+# 8.1.15 all the addition of rules for /etc/audit/audit.rules
+# 8.2.5 syslog-ng setting --> install and config
+# 8.3.2 tripwire usage
+# 9.1.7 /etc/cron.d chmod 700 (same applies for monthly weekly daily hourly) and chmod 600 for crontab
+# 9.1.8 /etc/at.deny delete, /etc/cron.allow touch, /etc/at.allow touch
+# 9.3.1 Protocol 2 openssh
+# 9.3.2 LogLevel INFO in openssh
+# 9.3.3 /etc/ssh/sshd_config chmod 600
+# 9.3.4 X11Forwarding no (uncomment)
+# 9.3.5 MaxAuthTries 4 (check on this one)
+# 9.3.6 IgnoreRhosts yes (uncomment)
+# 9.3.7 HostbasedAuthentication no (uncomment)
+# 9.3.8 PermitRootLogin no (uncomment)
+# 9.3.9 PermitEmptyPassword no (uncomment)
+# 9.3.10 PermitUserEnvironment no (uncomment)
+# 9.3.11 openssh ciphers chacha20-poly1305@openssh\.com,aes256-gcm@openssh\.com,aes128-gcm@openssh\.com,aes256-ctr,aes192-ctr,aes128-ctr
+# 9.3.14 banner on /etc/ssh/sshd_config 
+# 10.2 /bin/false for admin accounts
+# 10.4 umask 077 /etc/bash.bashrc /etc/profile.d /etc/profile
+# 13.6 group write permissions set on /usr/local/sbin /usr/local/bin /bin
+# 99.2 disable usb devices
 
 ##### Clean the system
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cleaning${RESET} the system"
