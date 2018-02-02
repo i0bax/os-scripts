@@ -149,7 +149,7 @@ export TERM=xterm
 if [[ $(which gnome-shell) ]]; then
   ##### RAM check
   if [[ "$(free -m | grep -i Mem | awk '{print $2}')" < 2048 ]]; then
-    echo -e '\n '${RED}'[!]'${RESET}" ${RED}You have <= 2GB of RAM and using GNOME${RESET}" 1>&
+    echo -e " ${RED}'[!]'${RESET} ${RED}You have <= 2GB of RAM and using GNOME${RESET}" 
     echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Might want to use XFCE instead${RESET}..."
     sleep 15s
   fi
