@@ -3602,52 +3602,208 @@ EOF
 chmod +x "${file}"
 
 ##### Custom insert point
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}custom objects ${RESET} & ${GREEN}php${RESET}"
 
-#aws shell https://github.com/awslabs/aws-shell
-#aquatone https://github.com/michenriksen/aquatone
-#theZoo https://github.com/ytisf/theZoo
+##### AWS Shell API
+git clone -q https://github.com/awslabs/aws-shell /opt/aws-shell-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/aquatone-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+##### aquatone - domain stuffs
+git clone -q https://github.com/michenriksen/aquatone /opt/aquatone-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/aquatone-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+##### theZoo - malware repository for use cases 
+git clone -q https://github.com/ytisf/theZoo /opt/theZoo-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/theZoo-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
 #rtfm https://github.com/leostat/rtfm
-#gittyleaks https://github.com/kootenpv/gittyleaks
-#trufflehog https://github.com/dxa4481/truffleHog
-#bloodhound https://github.com/BloodHoundAD/BloodHound
-#nmap vulners https://github.com/vulnersCom/nmap-vulners
-#arachni 
-#redsnarf https://github.com/nccgroup/redsnarf
+
+##### gittyleaks https://github.com/kootenpv/gittyleaks
+git clone -q https://github.com/kootenpv/gittyleaks /opt/gittyleaks-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/gittyleaks-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+##### trufflehog - Git secrets search
+git clone -q https://github.com/dxa4481/truffleHog /opt/truffleHog-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/truffleHog-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+#nmap vulners - nmap script extension
+git clone -q https://github.com/vulnersCom/nmap-vulners /opt/nmap-vulners-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/gittyleaks-git/ >/dev/null
+git pull -q
+popd >/dev/null
+ln -s /opt/nmap-vulners-git/vulners.nse /usr/share/nmap/scripts/vulners.nse
+
+##### Arachni - webapp vuln scanner (supplements Burpsuite)
+apt -y -qq install arachni \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  
+##### Redsnarf  - currently has issues with python scripting  https://github.com/nccgroup/redsnarf/issues/13
+#git clone -q https://github.com/nccgroup/redsnarf /opt/redsnarf-git/ \
+#  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+#pushd /opt/redsnarf-git/ >/dev/null
+#git pull -q
+#popd >/dev/null
+
 #sherlock https://github.com/rasta-mouse/Sherlock
-#mongoaudit https://github.com/stampery/mongoaudit
-#dbdat https://github.com/foospidy/DbDat
-#Scout2 https://github.com/nccgroup/Scout2
-#whatportis https://github.com/ncrocfer/whatportis
+git clone -q https://github.com/rasta-mouse/Sherlock /opt/Sherlock-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/Sherlock-git/ >/dev/null
+git pull -q
+popd >/dev/null
 
-##### Kali hardening
+##### mongoaudit - MongoDB auditing tool
+git clone -q https://github.com/stampery/mongoaudit /opt/mongoaudit-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/mongoaudit-git/ >/dev/null
+git pull -q
+popd >/dev/null
 
+#dbdat - DB assessment tool (MySQL, MSSQL, Oracle)
+git clone -q https://github.com/foospidy/DbDat /opt/DbDat-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/DbDat-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+##### Scout2 https://github.com/nccgroup/Scout2 - AWS CSP auditing platform
+pip install awsscout2
+
+##### whatportis https://github.com/ncrocfer/whatportis - lookup ports
+pip install whatportis
+
+##### hold Burpsuite from autoupgrading and breaking Burpsuite Pro
+apt-mark hold burpsuite
+
+##### Kali hardening, referencing CIS benchmark that won't break / hamstring Kali functionality
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Hardening system now ${GREEN}HARDEN HARDEN HARDEN ${RESET} ${GREEN}${RESET}"
+
+##### unattended upgrades 
+apt -y -qq install unattended-upgrades apt-listchanges \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  
 # 3.2 /boot/grub/grub.cfg chmod 400
+chmod 400 /boot/grub/grub.cfg
 
-# 7.1.2 net.ipv4.conf.all.send_redirects net.ipv4.conf.default.send_redirects net.ipv4.conf.default.accept_source_route net.ipv4.conf.all.accept_redirects net.ipv4.conf.default.accept_redirects net.ipv4.conf.all.secure_redirects net.ipv4.conf.default.secure_redirects net.ipv4.conf.all.log_martians net.ipv4.conf.default.log_martians net.ipv4.conf.all.rp_filter net.ipv4.conf.default.rp_filter net.ipv6.conf.all.accept_ra net.ipv6.conf.default.accept_ra net.ipv6.conf.all.accept_redirects net.ipv6.conf.default.accept_redirects
+# 7.1.2 sysctl settings out the wazoo
+sysctl -w net.ipv4.ip_forward=0
+sysctl -w net.ipv4.conf.all.accept_redirects=0
+sysctl -w net.ipv4.conf.all.accept_source_route=0
+sysctl -w net.ipv4.conf.all.log_martians=1
+sysctl -w net.ipv4.conf.default.accept_redirects=0
+sysctl -w net.ipv4.conf.default.accept_source_route=0
+sysctl -w net.ipv4.conf.default.log_martians=1
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
+sysctl -w net.ipv4.conf.all.secure_redirects=0
+sysctl -w net.ipv4.conf.all.send_redirects=0
+sysctl -w net.ipv4.conf.default.secure_redirects=0
+sysctl -w net.ipv4.conf.default.send_redirects=0
+sysctl -w net.ipv4.conf.default.log_martians=1
+sysctl -w net.ipv4.conf.default.rp_filter=1
+sysctl -w net.ipv4.conf.all.rp_filter=1
+sysctl -w net.ipv6.conf.default.accept_ra=0
+sysctl -w net.ipv6.conf.default.accept_ra_defrtr=0
+sysctl -w net.ipv6.conf.default.accept_ra_pinfo=0
+sysctl -w net.ipv6.conf.default.accept_redirects=0
+sysctl -w net.ipv6.conf.default.accept_source_route=0
+sysctl -w net.ipv6.conf.default.autoconf=0
+sysctl -w net.ipv6.conf.default.dad_transmits=0
+sysctl -w net.ipv6.conf.default.max_addresses=1
+sysctl -w net.ipv6.conf.default.router_solicitations=0
+sysctl -w net.ipv6.conf.default.use_tempaddr=2
+sysctl -w net.ipv6.conf.eth0.accept_ra_rtr_pref=0
+sysctl -w kernel.panic=60
+sysctl -w kernel.panic_on_oops=60
+sysctl -w kernel.perf_event_paranoid=2
 
 # 7.3.3 ipv6 disable waived 
+
 # 8.1.2 auditd configured
+apt -y -qq install auditd \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  
+curl https://raw.githubusercontent.com/major/cis-rhel-ansible/master/roles/cis/files/etc/audit/audit.rules > /etc/audit/audit.rules
+  
 # 8.1.15 all the addition of rules for /etc/audit/audit.rules
 # 8.2.5 syslog-ng setting --> install and config
+apt -y -qq install syslog-ng \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  
 # 8.3.2 tripwire usage
 # 9.1.7 /etc/cron.d chmod 700 (same applies for monthly weekly daily hourly) and chmod 600 for crontab
+chmod 700 /etc/cron.d  /etc/cron.monthly /etc/cron.weekly /etc/cron.daily /etc/cron.hourly
+chmod 600 /etc/crontab
+
 # 9.1.8 /etc/at.deny delete, /etc/cron.allow touch, /etc/at.allow touch
+touch /etc/at.allow
+touch /etc/cron.allow
+
 # 9.3.1 Protocol 2 openssh
+file=/etc/ssh/sshd_config; [ -e "${file}" ] && cp -n $file{,.bkup}
+echo "Protocol 2" >> /etc/ssh/sshd_config
+
 # 9.3.2 LogLevel INFO in openssh
+sed -i 's/^#LogLevel INFO/LogLevel INFO/g' "${file}"
+
 # 9.3.3 /etc/ssh/sshd_config chmod 600
+chmod 600 /etc/ssh/sshd_config
+
 # 9.3.4 X11Forwarding no (uncomment)
+sed -i 's/^X11Forwarding yes/#X11Forwarding no/g' "${file}"
+
 # 9.3.5 MaxAuthTries 4 (check on this one)
+sed -i 's/^#MaxAuthTries 6/MaxAuthTries 4/g' "${file}"
+
 # 9.3.6 IgnoreRhosts yes (uncomment)
+sed -i 's/^#IgnoreRhosts yes/IgnoreRhosts yes/g' "${file}"
+
 # 9.3.7 HostbasedAuthentication no (uncomment)
+sed -i 's/^#HostbasedAuthentication no/HostbasedAuthentication no/g' "${file}"
+
 # 9.3.8 PermitRootLogin no (uncomment)
+sed -i 's/^#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/g' "${file}"
+
 # 9.3.9 PermitEmptyPassword no (uncomment)
+sed -i 's/^#PermitEmptyPassword no/PermitEmptyPassword no/g' "${file}"
+
 # 9.3.10 PermitUserEnvironment no (uncomment)
+sed -i 's/^#PermitUserEnvironment no/PermitUserEnvironment no/g' "${file}"
+
 # 9.3.11 openssh ciphers chacha20-poly1305@openssh\.com,aes256-gcm@openssh\.com,aes128-gcm@openssh\.com,aes256-ctr,aes192-ctr,aes128-ctr
+echo Cipher selection >> /etc/ssh/sshd_config
+echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" >> /etc/ssh/sshd_config
+echo "KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1" >> /etc/ssh/sshd_config
+
 # 9.3.14 banner on /etc/ssh/sshd_config 
+sed -i 's/^#Banner none/Banner /etc/motd/g' "${file}"
+
 # 10.2 /bin/false for admin accounts
+
 # 10.4 umask 077 /etc/bash.bashrc /etc/profile.d /etc/profile
-# 13.6 group write permissions set on /usr/local/sbin /usr/local/bin /bin
+umask 077 /etc/bash.bashrc
+umask 077 /etc/profile.d
+umask 077 /etc/profile
+
 # 99.2 disable usb devices
+touch /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
+echo ACTION=="add", SUBSYSTEMS=="usb", TEST=="authorized_default", ATTR{authorized_default}="0" >> /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
 
 ##### Clean the system
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cleaning${RESET} the system"
