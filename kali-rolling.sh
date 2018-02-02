@@ -149,7 +149,7 @@ export TERM=xterm
 if [[ $(which gnome-shell) ]]; then
   ##### RAM check
   if [[ "$(free -m | grep -i Mem | awk '{print $2}')" < 2048 ]]; then
-     echo -e '\n '${RED}'[!]'${RESET}" ${RED}You have <= 2GB of RAM and using GNOME${RESET}" 1>&
+    echo -e '\n '${RED}'[!]'${RESET}" ${RED}You have <= 2GB of RAM and using GNOME${RESET}" 1>&
     echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Might want to use XFCE instead${RESET}..."
     sleep 15s
   fi
@@ -3785,7 +3785,7 @@ sed -i 's/^#PermitEmptyPassword no/PermitEmptyPassword no/g' "${file}"
 # 9.3.10 PermitUserEnvironment no (uncomment)
 sed -i 's/^#PermitUserEnvironment no/PermitUserEnvironment no/g' "${file}"
 
-# 9.3.11 openssh ciphers chacha20-poly1305@openssh\.com,aes256-gcm@openssh\.com,aes128-gcm@openssh\.com,aes256-ctr,aes192-ctr,aes128-ctr
+# 9.3.11 OpenSSH cipher/mac/key configuration based on Bettercrypto.org
 echo Cipher selection >> /etc/ssh/sshd_config
 echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
 echo "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" >> /etc/ssh/sshd_config
