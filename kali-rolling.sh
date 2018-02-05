@@ -1917,7 +1917,7 @@ EOF
     apt -y -qq install libnss3-tools \
       || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
     folder=$(find ~/.mozilla/firefox/ -maxdepth 1 -type d -name '*.default' -print -quit)
-    certutil -A -n Burp -t "CT,c,c" -d "${folder}" -i /tmp/burp.crt
+    certutil -A -n Burp -t "CT,c,c" -d "${folder}" -i /tmp/burp.der
     timeout 15 firefox >/dev/null 2>&1
     timeout 5 killall -9 -q -w firefox-esr >/dev/null
     #mkdir -p /usr/share/ca-certificates/burp/
