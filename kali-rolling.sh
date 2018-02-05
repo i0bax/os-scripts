@@ -1308,7 +1308,7 @@ sed -i 's/^.*extensions.https_everywhere._observatory.popup_shown.*/user_pref("e
 sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.ports.banned.override", "1-65455");' "${file}" 2>/dev/null \
   || echo 'user_pref("network.security.ports.banned.override", "1-65455");' >> "${file}"
 #--- Replace bookmarks (base: http://pentest-bookmarks.googlecode.com)
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -print -quit)+"bookmarks.html"
+file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -print -quit)"bookmarks.html"
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
 timeout 300 curl --progress -k -L -f "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/pentest-bookmarks/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
@@ -1374,7 +1374,7 @@ echo -n '[3/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.o
   -o "${ffpath}/firebug@software.joehewitt.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Firebug'" 1>&2
 #--- FoxyProxy Basic
-echo -n '[4/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/15023/addon-15023-latest.xpi?src=dp-btn-primary" \
+echo -n '[4/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/file/579775/foxyproxy_basic-3.6.5-fx+sm+tb.xpi?src=version-history" \
   -o "${ffpath}/foxyproxy-basic@eric.h.jung.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'FoxyProxy Basic'" 1>&2
 #--- User Agent Overrider
@@ -1904,22 +1904,16 @@ EOF
  # export DISPLAY=:0.0
   timeout 120 burpsuite >/dev/null 2>&1 &
   PID=$!
-  sleep 15s
-  echo "-----BEGIN CERTIFICATE-----" > /tmp/PortSwiggerCA \
-    && awk -F '"' '/caCert/ {print $4}' ~/.java/.userPrefs/burp/prefs.xml | fold -w 64 >> /tmp/PortSwiggerCA \
-    && echo "-----END CERTIFICATE-----" >> /tmp/PortSwiggerCA
-  export http_proxy="http://127.0.0.1:8080"
-  rm -f /tmp/burp.crt
+  rm -f /tmp/burp.der
   while test -d /proc/${PID}; do
     sleep 1s
-    curl --progress -k -L -f "http://burp/cert" -o /tmp/burp.crt 2>/dev/null      # || echo -e ' '${RED}'[!]'${RESET}" Issue downloading burp.crt" 1>&2
-    [ -f /tmp/burp.crt ] && break
+    curl --progress -k -L -f "http://localhost:8080/cert" -o /tmp/burp.der 2>/dev/null      # || echo -e ' '${RED}'[!]'${RESET}" Issue downloading burp.crt" 1>&2
+    [ -f /tmp/burp.der ] && break
   done
   timeout 5 kill ${PID} 2>/dev/null \
     || echo -e ' '${RED}'[!]'${RESET}" Failed to kill ${RED}burpsuite${RESET}"
-  unset http_proxy
   #--- Installing CA
-  if [[ -f /tmp/burp.crt ]]; then
+  if [[ -f /tmp/burp.der ]]; then
     apt -y -qq install libnss3-tools \
       || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
     folder=$(find ~/.mozilla/firefox/ -maxdepth 1 -type d -name '*.default' -print -quit)
@@ -2866,7 +2860,7 @@ popd >/dev/null
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}veil-evasion framework${RESET} ~ bypassing anti-virus"
 apt -y -qq install veil-evasion \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-#bash /usr/share/veil-evasion/setup/setup.sh --silent
+bash /usr/share/veil/setup/setup.sh --silent
 mkdir -p /var/lib/veil-evasion/go/bin/
 touch /etc/veil/settings.py
 sed -i 's/TERMINAL_CLEAR=".*"/TERMINAL_CLEAR="false"/' /etc/veil/settings.py
@@ -3624,12 +3618,12 @@ git pull -q
 popd >/dev/null
 
 ##### theZoo - malware repository for use cases 
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Malware Zoo ${RESET}"
-git clone -q https://github.com/ytisf/theZoo /opt/theZoo-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/theZoo-git/ >/dev/null
-git pull -q
-popd >/dev/null
+#(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Malware Zoo ${RESET}"
+#git clone -q https://github.com/ytisf/theZoo /opt/theZoo-git/ \
+#  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+#pushd /opt/theZoo-git/ >/dev/null
+#git pull -q
+#popd >/dev/null
 
 #rtfm https://github.com/leostat/rtfm
 
@@ -3717,36 +3711,36 @@ apt -y -qq install unattended-upgrades apt-listchanges \
 chmod 400 /boot/grub/grub.cfg
 
 # 7.1.2 sysctl settings out the wazoo
-sysctl -w net.ipv4.ip_forward=0
-sysctl -w net.ipv4.conf.all.accept_redirects=0
-sysctl -w net.ipv4.conf.all.accept_source_route=0
-sysctl -w net.ipv4.conf.all.log_martians=1
-sysctl -w net.ipv4.conf.default.accept_redirects=0
-sysctl -w net.ipv4.conf.default.accept_source_route=0
-sysctl -w net.ipv4.conf.default.log_martians=1
-sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
-sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
-sysctl -w net.ipv4.conf.all.secure_redirects=0
-sysctl -w net.ipv4.conf.all.send_redirects=0
-sysctl -w net.ipv4.conf.default.secure_redirects=0
-sysctl -w net.ipv4.conf.default.send_redirects=0
-sysctl -w net.ipv4.conf.default.log_martians=1
-sysctl -w net.ipv4.conf.default.rp_filter=1
-sysctl -w net.ipv4.conf.all.rp_filter=1
-sysctl -w net.ipv6.conf.default.accept_ra=0
-sysctl -w net.ipv6.conf.default.accept_ra_defrtr=0
-sysctl -w net.ipv6.conf.default.accept_ra_pinfo=0
-sysctl -w net.ipv6.conf.default.accept_redirects=0
-sysctl -w net.ipv6.conf.default.accept_source_route=0
-sysctl -w net.ipv6.conf.default.autoconf=0
-sysctl -w net.ipv6.conf.default.dad_transmits=0
-sysctl -w net.ipv6.conf.default.max_addresses=1
-sysctl -w net.ipv6.conf.default.router_solicitations=0
-sysctl -w net.ipv6.conf.default.use_tempaddr=2
-sysctl -w net.ipv6.conf.eth0.accept_ra_rtr_pref=0
-sysctl -w kernel.panic=60
-sysctl -w kernel.panic_on_oops=60
-sysctl -w kernel.perf_event_paranoid=2
+sysctl -w net.ipv4.ip_forward=0 > /dev/null
+sysctl -w net.ipv4.conf.all.accept_redirects=0 > /dev/null
+sysctl -w net.ipv4.conf.all.accept_source_route=0 > /dev/null
+sysctl -w net.ipv4.conf.all.log_martians=1 > /dev/null 
+sysctl -w net.ipv4.conf.default.accept_redirects=0 > /dev/null
+sysctl -w net.ipv4.conf.default.accept_source_route=0 > /dev/null
+sysctl -w net.ipv4.conf.default.log_martians=1 > /dev/null
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1 > /dev/null
+sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1 > /dev/null
+sysctl -w net.ipv4.conf.all.secure_redirects=0 > /dev/null
+sysctl -w net.ipv4.conf.all.send_redirects=0 > /dev/null
+sysctl -w net.ipv4.conf.default.secure_redirects=0 > /dev/null
+sysctl -w net.ipv4.conf.default.send_redirects=0 > /dev/null
+sysctl -w net.ipv4.conf.default.log_martians=1 > /dev/null
+sysctl -w net.ipv4.conf.default.rp_filter=1 > /dev/null
+sysctl -w net.ipv4.conf.all.rp_filter=1 > /dev/null
+sysctl -w net.ipv6.conf.default.accept_ra=0 > /dev/null
+sysctl -w net.ipv6.conf.default.accept_ra_defrtr=0 > /dev/null
+sysctl -w net.ipv6.conf.default.accept_ra_pinfo=0 > /dev/null
+sysctl -w net.ipv6.conf.default.accept_redirects=0 > /dev/null
+sysctl -w net.ipv6.conf.default.accept_source_route=0 > /dev/null
+sysctl -w net.ipv6.conf.default.autoconf=0 > /dev/null
+sysctl -w net.ipv6.conf.default.dad_transmits=0 > /dev/null
+sysctl -w net.ipv6.conf.default.max_addresses=1 > /dev/null
+sysctl -w net.ipv6.conf.default.router_solicitations=0 > /dev/null
+sysctl -w net.ipv6.conf.default.use_tempaddr=2 > /dev/null
+sysctl -w net.ipv6.conf.eth0.accept_ra_rtr_pref=0 > /dev/null
+sysctl -w kernel.panic=60 > /dev/null
+sysctl -w kernel.panic_on_oops=60 > /dev/null
+sysctl -w kernel.perf_event_paranoid=2 > /dev/null
 
 # 7.3.3 ipv6 disable waived 
 
@@ -3807,13 +3801,13 @@ sed -i 's/^#PermitEmptyPassword no/PermitEmptyPassword no/g' "${file}"
 sed -i 's/^#PermitUserEnvironment no/PermitUserEnvironment no/g' "${file}"
 
 # 9.3.11 OpenSSH cipher/mac/key configuration based on Bettercrypto.org
-echo Cipher selection >> /etc/ssh/sshd_config
+echo "# Cipher selection" >> /etc/ssh/sshd_config
 echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr" >> /etc/ssh/sshd_config
-echo "MACs hmac-sha2-512,hmac-sha2-256,hmac-ripemd160" >> /etc/ssh/sshd_config
+echo "MACs hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
 echo "KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1" >> /etc/ssh/sshd_config
 
 # 9.3.14 banner on /etc/ssh/sshd_config 
-sed -i 's/^#Banner none/Banner /etc/motd/g' "${file}"
+sed -i 's/^#Banner none/Banner \/etc\/motd/g' "${file}"
 
 # 10.2 /bin/false for admin accounts
 
