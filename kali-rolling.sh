@@ -734,7 +734,7 @@ update-alternatives --set x-session-manager /usr/bin/xfce4-session   #update-alt
 #export DISPLAY=:0.0
 #--- axiom / axiomd (May 18 2010) XFCE4 theme ~ http://xfce-look.org/content/show.php/axiom+xfwm?content=90145
 mkdir -p ~/.themes/
-timeout 300 curl --progress -k -L -f "https://www.opendesktop.org/p/1016679/startdownload?file_id=1461767736&file_name=90145-axiom.tar.gz&file_type=application/x-gzip&file_size=134386&url=https%3A%2F%2Fdl.opendesktop.org%2Fapi%2Ffiles%2Fdownloadfile%2Fid%2F1461767736%2Fs%2Faa2f3a8a5503f2354231419ec619de4a%2Ft%2F1517607399%2Fu%2F%2F90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
+timeout 300 curl --progress -k -L -f "https://www.opendesktop.org/p/1016679/startdownload?file_id=1461767736&file_name=90145-axiom.tar.gz&file_type=application/x-gzip&file_size=134386&url=https%3A%2F%2Fdl.opendesktop.org%2Fapi%2Ffiles%2Fdownloadfile%2Fid%2F1461767736%2Fs%2F4df57f1e567be7791fb66dcbea784f30%2Ft%2F1517860512%2Fu%2F%2F90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
 tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
 xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
@@ -995,7 +995,8 @@ grep -q '^## samba' "${file}" 2>/dev/null \
 grep -q '^## rdesktop' "${file}" 2>/dev/null \
   || echo -e '## rdesktop\nalias rdesktop="rdesktop -z -P -g 90% -r disk:local=\"/tmp/\""\n' >> "${file}"
 grep -q '^## python http' "${file}" 2>/dev/null \
-  || echo -e '## python http\nalias http="python2 -m SimpleHTTPServer"\n' >> "${file}"#--- Add in folders
+  || echo -e '## python http\nalias http="python2 -m SimpleHTTPServer"\n' >> "${file}"
+#--- Add in folders
 grep -q '^## www' "${file}" 2>/dev/null \
   || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n#alias www="cd /var/www/html/"\n' >> "${file}"
 grep -q '^## ftp' "${file}" 2>/dev/null \
@@ -1307,7 +1308,7 @@ sed -i 's/^.*extensions.https_everywhere._observatory.popup_shown.*/user_pref("e
 sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.ports.banned.override", "1-65455");' "${file}" 2>/dev/null \
   || echo 'user_pref("network.security.ports.banned.override", "1-65455");' >> "${file}"
 #--- Replace bookmarks (base: http://pentest-bookmarks.googlecode.com)
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'bookmarks.html' -print -quit)
+file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -print -quit)+"bookmarks.html"
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
 timeout 300 curl --progress -k -L -f "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/pentest-bookmarks/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
@@ -1329,10 +1330,11 @@ sed -i 's#^</DL><p>#    <DT><A HREF="https://hackvertor.co.uk/public">HackVertor
 sed -i 's#^</DL><p>#    <DT><A HREF="http://www.irongeek.com/skiddypad.php">SkiddyPad</A>\n</DL><p>#' "${file}"   # Add Skiddypad to bookmark toolbar
 sed -i 's#^</DL><p>#    <DT><A HREF="https://www.exploit-db.com/search/">Exploit-DB</A>\n</DL><p>#' "${file}"     # Add Exploit-DB to bookmark toolbar
 sed -i 's#^</DL><p>#    <DT><A HREF="http://offset-db.com/">Offset-DB</A>\n</DL><p>#' "${file}"                   # Add Offset-DB to bookmark toolbar
-sed -i 's#^</DL><p>#    <DT><A HREF="http://shell-storm.org/shellcode/">Shelcodes</A>\n</DL><p>#' "${file}"       # Add Shelcodes to bookmark toolbar
+sed -i 's#^</DL><p>#    <DT><A HREF="http://shell-storm.org/shellcode/">Shellcodes</A>\n</DL><p>#' "${file}"       # Add Shelcodes to bookmark toolbar
 sed -i 's#^</DL><p>#    <DT><A HREF="http://ropshell.com/">ROP Shell</A>\n</DL><p>#' "${file}"                    # Add ROP Shell to bookmark toolbar
 sed -i 's#^</DL><p>#    <DT><A HREF="https://ifconfig.io/">ifconfig</A>\n</DL><p>#' "${file}"                     # Add ifconfig.io to bookmark toolbar
 sed -i 's#<HR>#<DT><H3 ADD_DATE="1303667175" LAST_MODIFIED="1303667175" PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Toolbar</H3>\n<DD>Add bookmarks to this folder to see them displayed on the Bookmarks Toolbar#' "${file}"
+cp /tmp/bookmarks_new.html ${file}
 #--- Clear bookmark cache
 find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -mindepth 1 -type f -name "places.sqlite" -delete
 find ~/.mozilla/firefox/*.default*/bookmarkbackups/ -type f -delete
@@ -1772,7 +1774,7 @@ if [ -e /tmp/atom.deb ]; then
 EOF
   fi
   #--- Add to panel (GNOME)
-  export DISPLAY=:0.0
+ # export DISPLAY=:0.0
   [[ $(which gnome-shell) ]] \
     && gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed "s/'org.gnome.gedit.desktop'/'atom.desktop'/")"
   #--- Add to panel (XFCE)
@@ -1899,13 +1901,13 @@ if [[ "${burpFree}" != "false" ]]; then
 EOF
   #--- Extract CA
   find /tmp/ -maxdepth 1 -name 'burp*.tmp' -delete
-  export DISPLAY=:0.0
+ # export DISPLAY=:0.0
   timeout 120 burpsuite >/dev/null 2>&1 &
   PID=$!
   sleep 15s
-  #echo "-----BEGIN CERTIFICATE-----" > /tmp/PortSwiggerCA \
-  #  && awk -F '"' '/caCert/ {print $4}' ~/.java/.userPrefs/burp/prefs.xml | fold -w 64 >> /tmp/PortSwiggerCA \
-  #  && echo "-----END CERTIFICATE-----" >> /tmp/PortSwiggerCA
+  echo "-----BEGIN CERTIFICATE-----" > /tmp/PortSwiggerCA \
+    && awk -F '"' '/caCert/ {print $4}' ~/.java/.userPrefs/burp/prefs.xml | fold -w 64 >> /tmp/PortSwiggerCA \
+    && echo "-----END CERTIFICATE-----" >> /tmp/PortSwiggerCA
   export http_proxy="http://127.0.0.1:8080"
   rm -f /tmp/burp.crt
   while test -d /proc/${PID}; do
@@ -2207,7 +2209,7 @@ apt -y -qq install daemonfs \
 apt -y -qq install filezilla \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Configure filezilla
-export DISPLAY=:0.0
+#export DISPLAY=:0.0
 timeout 5 filezilla >/dev/null 2>&1     # Start and kill. Files needed for first time run
 mkdir -p ~/.config/filezilla/
 file=~/.config/filezilla/filezilla.xml; [ -e "${file}" ] && cp -n $file{,.bkup}
@@ -2804,7 +2806,7 @@ echo -e 'application/x-ms-dos-executable=wine.desktop' >> "${file}"
 
 ##### Install Wine (Windows)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Wine (Windows)${RESET}"
-apt -y -qq install wine curl unzip \
+apt -y -qq install wine \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/mingw/files/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip/download" > /tmp/mingw-get.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading mingw-get.zip" 1>&2       #***!!! hardcoded path!
@@ -2897,8 +2899,8 @@ apt -y -qq install unzip windows-binaries \
 #--- Compile
 i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
   /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
-  -o /usr/share/windows-binaries/hyperion/Src/Crypter/bin/crypter.exe
-ln -sf /usr/share/windows-binaries/hyperion/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/hyperion/crypter.exe                                                            #***!!! hardcoded path!
+  -o /usr/share/windows-binaries/hyperion/Src/Crypter/crypter.exe
+ln -sf /usr/share/windows-binaries/hyperion/Src/Crypter/crypter.exe /usr/share/windows-binaries/hyperion/crypter.exe                                                            #***!!! hardcoded path!
 wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
   -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
   | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
@@ -2923,15 +2925,15 @@ BWD="?"
 [[ "\${BWD}" == "?" ]] && echo -e ' '${RED}'[!]'${RESET}' Cant find \$1. Quitting...' && exit
 
 ## The magic!
-cd /usr/share/windows-binaries/Hyperion-1.0/
-$(which wine) ./Src/Crypter/bin/crypter.exe \${BWD}\${1} output.exe
+cd /usr/share/windows-binaries/hyperion/
+$(which wine) ./Src/Crypter/crypter.exe \${BWD}\${1} output.exe
 
 ## Restore our path
 cd \${CWD}/
 sleep 1s
 
 ## Move the output file
-mv -f /usr/share/windows-binaries/Hyperion-1.0/output.exe \${2}
+mv -f /usr/share/windows-binaries/hyperion/output.exe \${2}
 
 ## Generate file hashes
 for FILE in \${1} \${2}; do
@@ -3482,8 +3484,8 @@ source "${file}" || source ~/.zshrc
 
 ##### Install mysql
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}MySQL${RESET} ~ database"
-apt -y -qq install mysql-server \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#apt -y -qq install mysql-common \
+#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 echo -e " ${YELLOW}[i]${RESET} MySQL username: root"
 echo -e " ${YELLOW}[i]${RESET} MySQL password: <blank>   ***${BOLD}CHANGE THIS ASAP${RESET}***"
 [[ -e ~/.my.cnf ]] \
@@ -3603,16 +3605,18 @@ EOF
 chmod +x "${file}"
 
 ##### Custom insert point
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}custom objects ${RESET} & ${GREEN}php${RESET}"
+
 
 ##### AWS Shell API
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}AWS Shell ${RESET}"
 git clone -q https://github.com/awslabs/aws-shell /opt/aws-shell-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/aquatone-git/ >/dev/null
+pushd /opt/aws-shell-git/ >/dev/null
 git pull -q
 popd >/dev/null
 
 ##### aquatone - domain stuffs
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}aquatone ${RESET}"
 git clone -q https://github.com/michenriksen/aquatone /opt/aquatone-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/aquatone-git/ >/dev/null
@@ -3620,6 +3624,7 @@ git pull -q
 popd >/dev/null
 
 ##### theZoo - malware repository for use cases 
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Malware Zoo ${RESET}"
 git clone -q https://github.com/ytisf/theZoo /opt/theZoo-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/theZoo-git/ >/dev/null
@@ -3629,6 +3634,7 @@ popd >/dev/null
 #rtfm https://github.com/leostat/rtfm
 
 ##### gittyleaks https://github.com/kootenpv/gittyleaks
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}gittyleaks ${RESET}"
 git clone -q https://github.com/kootenpv/gittyleaks /opt/gittyleaks-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/gittyleaks-git/ >/dev/null
@@ -3636,6 +3642,7 @@ git pull -q
 popd >/dev/null
 
 ##### trufflehog - Git secrets search
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}truffleHog ${RESET}"
 git clone -q https://github.com/dxa4481/truffleHog /opt/truffleHog-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/truffleHog-git/ >/dev/null
@@ -3643,6 +3650,7 @@ git pull -q
 popd >/dev/null
 
 #nmap vulners - nmap script extension
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}nmap vulners script extension ${RESET}"
 git clone -q https://github.com/vulnersCom/nmap-vulners /opt/nmap-vulners-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/gittyleaks-git/ >/dev/null
@@ -3651,6 +3659,7 @@ popd >/dev/null
 ln -s /opt/nmap-vulners-git/vulners.nse /usr/share/nmap/scripts/vulners.nse
 
 ##### Arachni - webapp vuln scanner (supplements Burpsuite)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Arachni webapp scanner ${RESET}"
 apt -y -qq install arachni \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   
@@ -3662,6 +3671,7 @@ apt -y -qq install arachni \
 #popd >/dev/null
 
 #sherlock https://github.com/rasta-mouse/Sherlock
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Sherlock from RastaMouse ${RESET}"
 git clone -q https://github.com/rasta-mouse/Sherlock /opt/Sherlock-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/Sherlock-git/ >/dev/null
@@ -3669,6 +3679,7 @@ git pull -q
 popd >/dev/null
 
 ##### mongoaudit - MongoDB auditing tool
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}MongoDB - db audit tool ${RESET}"
 git clone -q https://github.com/stampery/mongoaudit /opt/mongoaudit-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/mongoaudit-git/ >/dev/null
@@ -3676,6 +3687,7 @@ git pull -q
 popd >/dev/null
 
 #dbdat - DB assessment tool (MySQL, MSSQL, Oracle)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}DBDat - database assessment tool ${RESET}"
 git clone -q https://github.com/foospidy/DbDat /opt/DbDat-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/DbDat-git/ >/dev/null
@@ -3683,12 +3695,15 @@ git pull -q
 popd >/dev/null
 
 ##### Scout2 https://github.com/nccgroup/Scout2 - AWS CSP auditing platform
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Scout2 - AWS CSP auditing platform ${RESET}"
 pip install awsscout2
 
 ##### whatportis https://github.com/ncrocfer/whatportis - lookup ports
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}WhatPortIs ${RESET}"
 pip install whatportis
 
 ##### hold Burpsuite from autoupgrading and breaking Burpsuite Pro
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Holding ${GREEN}Burpsuite ${RESET} from autoupgrade"
 apt-mark hold burpsuite
 
 ##### Kali hardening, referencing CIS benchmark that won't break / hamstring Kali functionality
@@ -3736,17 +3751,21 @@ sysctl -w kernel.perf_event_paranoid=2
 # 7.3.3 ipv6 disable waived 
 
 # 8.1.2 auditd configured
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}auditd ${RESET}"
 apt -y -qq install auditd \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   
 curl https://raw.githubusercontent.com/major/cis-rhel-ansible/master/roles/cis/files/etc/audit/audit.rules > /etc/audit/audit.rules
   
 # 8.1.15 all the addition of rules for /etc/audit/audit.rules
+
 # 8.2.5 syslog-ng setting --> install and config
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}syslog-ng ${RESET}"
 apt -y -qq install syslog-ng \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   
 # 8.3.2 tripwire usage
+
 # 9.1.7 /etc/cron.d chmod 700 (same applies for monthly weekly daily hourly) and chmod 600 for crontab
 chmod 700 /etc/cron.d  /etc/cron.monthly /etc/cron.weekly /etc/cron.daily /etc/cron.hourly
 chmod 600 /etc/crontab
@@ -3756,6 +3775,7 @@ touch /etc/at.allow
 touch /etc/cron.allow
 
 # 9.3.1 Protocol 2 openssh
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Hardening ${GREEN}OpenSSH server configuration ${RESET}"
 file=/etc/ssh/sshd_config; [ -e "${file}" ] && cp -n $file{,.bkup}
 echo "Protocol 2" >> /etc/ssh/sshd_config
 
@@ -3803,6 +3823,7 @@ umask 077 /etc/profile.d
 umask 077 /etc/profile
 
 # 99.2 disable usb devices
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Disable USB devices ${GREEN} ${RESET}"
 touch /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
 echo ACTION=="add", SUBSYSTEMS=="usb", TEST=="authorized_default", ATTR{authorized_default}="0" >> /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
 
