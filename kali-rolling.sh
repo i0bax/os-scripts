@@ -1784,7 +1784,7 @@ fi
 ##### Configuring Gedit
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}Gedit${RESET} ~ GUI text editor"
 #--- Install Gedit
-apt -y -qq install gedit \
+apt -y -qq install gedit gedit-plugins \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Configure Gedit
 dconf write /org/gnome/gedit/preferences/editor/wrap-last-split-mode "'word'"
@@ -1800,6 +1800,7 @@ for plugin in modelines sort externaltools docinfo filebrowser quickopen time sp
     && continue
   new=$( echo "${loaded} '${plugin}']" | sed "s/'] /', /" )
   dconf write /org/gnome/gedit/plugins/active-plugins "${new}"
+  echo $new
 done
 
 ##### Install PyCharm (Community Edition)
@@ -1902,7 +1903,7 @@ EOF
   #--- Extract CA
   find /tmp/ -maxdepth 1 -name 'burp*.tmp' -delete
  # export DISPLAY=:0.0
-  timeout 120 burpsuite >/dev/null 2>&1 &
+  timeout 120 burpsuite --use-defaults >/dev/null 2>&1 &
   PID=$!
   rm -f /tmp/burp.der
   while test -d /proc/${PID}; do
@@ -2860,7 +2861,7 @@ popd >/dev/null
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}veil-evasion framework${RESET} ~ bypassing anti-virus"
 apt -y -qq install veil-evasion \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-bash /usr/share/veil/setup/setup.sh --silent
+#bash /usr/share/veil/setup/setup.sh --silent
 mkdir -p /var/lib/veil-evasion/go/bin/
 touch /etc/veil/settings.py
 sed -i 's/TERMINAL_CLEAR=".*"/TERMINAL_CLEAR="false"/' /etc/veil/settings.py
@@ -3849,6 +3850,7 @@ echo -e " ${YELLOW}[i]${RESET} Stages skipped: $(( TOTAL-STAGE ))"
 ##### Done!
 echo -e "\n ${YELLOW}[i]${RESET} Don't forget to:"
 echo -e " ${YELLOW}[i]${RESET} + Check the above output (Did everything install? Any errors? (${RED}HINT: What's in RED${RESET}?)"
+echo -e " ${YELLOW}[i]${RESET} + Manually install Burpsuite CA cert" #since this doesn't look possible in Community
 echo -e " ${YELLOW}[i]${RESET} + Manually install: Nessus, Nexpose, and/or Metasploit Community"
 echo -e " ${YELLOW}[i]${RESET} + Agree/Accept to: Maltego, OWASP ZAP, w3af, PyCharm, etc"
 echo -e " ${YELLOW}[i]${RESET} + Setup git:   ${YELLOW}git config --global user.name <name>;git config --global user.email <email>${RESET}"
