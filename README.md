@@ -1,13 +1,3 @@
 # OS-Scripts
 
-Personal collection of Operating System (OS) scripts _(and related things)_.
-
-- - -
-
-## Kali Rolling
-
-Kali Rolling (2016.1) _(Debian Testing)_
-![](https://i.imgur.com/23dGQEa.png)
-_Left: tweaked GNOME 3.18,  Right: custom XFCE 4.12.  Both running conky._
-
-- - -
+Fork of g0tmi1k's os-scripts that I found several years ago doing OSCP. Updated for 2018 and some additional tools that I've enjoyed over the years. Tested on Kali 2017.3 Rolling. 
