@@ -34,8 +34,8 @@ if [ 1 -eq 0 ]; then    # This is never true, thus it acts as block comments ;)
 ################################################################################
 ### One liner - Grab the latest version and execute! ###########################
 ################################################################################
-wget -qO kali-rolling.sh https://raw.github.com/sp3nx0r/os-scripts/master/kali-rolling.sh \
-  && bash kali-rolling.sh -burp -keyboard us -timezone "America/Chicago"
+wget -qO kali-rolling.sh https://raw.githubusercontent.com/i0bax/os-scripts/master/kali-rolling.sh \
+  && bash kali-rolling.sh -burp -keyboard pl -timezone "Europe/Warsaw"
 ################################################################################
 fi
 
@@ -150,7 +150,7 @@ fi
 if [[ $(which gnome-shell) ]]; then
   ##### RAM check
   if [[ "$(free -m | grep -i Mem | awk '{print $2}')" < 2048 ]]; then
-    echo -e " ${RED}[!]${RESET} ${RED}You have <= 2GB of RAM and using GNOME${RESET}" 
+    echo -e " ${RED}[!]${RESET} ${RED}You have <= 2GB of RAM and using GNOME${RESET}"
     echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Might want to use XFCE instead${RESET}..."
     sleep 5s
   fi
@@ -442,7 +442,7 @@ if [[ $(which gnome-shell) ]]; then
 #  export DISPLAY=:0.0
   #-- Gnome Extension - Dash Dock (the toolbar with all the icons)
   gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true      # Set dock to use the full height
-  gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'RIGHT'   # Set dock to the right
+  gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'   # Set dock to the right
   gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true         # Set dock to be always visible
   gsettings set org.gnome.shell favorite-apps \
     "['gnome-terminal.desktop', 'org.gnome.Nautilus.desktop', 'kali-wireshark.desktop', 'firefox-esr.desktop', 'kali-burpsuite.desktop', 'kali-msfconsole.desktop', 'gedit.desktop']"
@@ -482,7 +482,7 @@ apt -y -qq install xfce4 xfce4-mount-plugin xfce4-notifyd xfce4-places-plugin xf
 mkdir -p ~/.config/xfce4/panel/launcher-{2,4,5,6,7,8,9}/
 mkdir -p ~/.config/xfce4/xfconf/xfce-perchannel-xml/
 #--- Configuring XFCE (Keyboard shortcuts)
-cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml \
+cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcutsll.xml \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 <?xml version="1.0" encoding="UTF-8"?>
 
@@ -580,6 +580,158 @@ cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml \
   </property>
 </channel>
 EOF
+
+#--- Configuring XFCE (Desktop[Black])
+cat <<EOF > ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  <?xml version="1.0" encoding="UTF-8"?>
+
+  <channel name="xfce4-desktop" version="1.0">
+    <property name="backdrop" type="empty">
+      <property name="screen0" type="empty">
+        <property name="monitor0" type="empty">
+          <property name="brightness" type="empty"/>
+          <property name="color1" type="empty"/>
+          <property name="color2" type="empty"/>
+          <property name="color-style" type="empty"/>
+          <property name="image-path" type="string" value="/usr/share/images/desktop-base/default"/>
+          <property name="image-show" type="bool" value="true"/>
+          <property name="last-image" type="empty"/>
+          <property name="last-single-image" type="empty"/>
+          <property name="workspace0" type="empty">
+            <property name="color-style" type="int" value="0"/>
+            <property name="color1" type="array">
+              <value type="uint" value="0"/>
+              <value type="uint" value="0"/>
+              <value type="uint" value="0"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="color2" type="array">
+              <value type="uint" value="0"/>
+              <value type="uint" value="0"/>
+              <value type="uint" value="0"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="image-style" type="int" value="0"/>
+            <property name="last-image" type="string" value="/root/Desktop/black.png"/>
+            <property name="backdrop-cycle-enable" type="bool" value="false"/>
+          </property>
+          <property name="workspace1" type="empty">
+            <property name="color-style" type="int" value="1"/>
+            <property name="color1" type="array">
+              <value type="uint" value="7936"/>
+              <value type="uint" value="16128"/>
+              <value type="uint" value="28416"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="color2" type="array">
+              <value type="uint" value="26880"/>
+              <value type="uint" value="34048"/>
+              <value type="uint" value="46848"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="image-style" type="int" value="5"/>
+            <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
+          </property>
+          <property name="workspace2" type="empty">
+            <property name="color-style" type="int" value="1"/>
+            <property name="color1" type="array">
+              <value type="uint" value="7936"/>
+              <value type="uint" value="16128"/>
+              <value type="uint" value="28416"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="color2" type="array">
+              <value type="uint" value="26880"/>
+              <value type="uint" value="34048"/>
+              <value type="uint" value="46848"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="image-style" type="int" value="5"/>
+            <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
+          </property>
+        </property>
+        <property name="monitor1" type="empty">
+          <property name="brightness" type="empty"/>
+          <property name="color1" type="empty"/>
+          <property name="color2" type="empty"/>
+          <property name="color-style" type="empty"/>
+          <property name="image-path" type="empty"/>
+          <property name="image-show" type="empty"/>
+          <property name="last-image" type="empty"/>
+          <property name="last-single-image" type="empty"/>
+          <property name="workspace0" type="empty">
+            <property name="color-style" type="int" value="0"/>
+            <property name="color1" type="array">
+              <value type="uint" value="0"/>
+              <value type="uint" value="0"/>
+              <value type="uint" value="0"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="color2" type="array">
+              <value type="uint" value="26880"/>
+              <value type="uint" value="34048"/>
+              <value type="uint" value="46848"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="image-style" type="int" value="0"/>
+            <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
+            <property name="backdrop-cycle-enable" type="bool" value="false"/>
+          </property>
+          <property name="workspace1" type="empty">
+            <property name="color-style" type="int" value="1"/>
+            <property name="color1" type="array">
+              <value type="uint" value="7936"/>
+              <value type="uint" value="16128"/>
+              <value type="uint" value="28416"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="color2" type="array">
+              <value type="uint" value="26880"/>
+              <value type="uint" value="34048"/>
+              <value type="uint" value="46848"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="image-style" type="int" value="5"/>
+            <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
+          </property>
+          <property name="workspace2" type="empty">
+            <property name="color-style" type="int" value="1"/>
+            <property name="color1" type="array">
+              <value type="uint" value="7936"/>
+              <value type="uint" value="16128"/>
+              <value type="uint" value="28416"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="color2" type="array">
+              <value type="uint" value="26880"/>
+              <value type="uint" value="34048"/>
+              <value type="uint" value="46848"/>
+              <value type="uint" value="65535"/>
+            </property>
+            <property name="image-style" type="int" value="5"/>
+            <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
+          </property>
+        </property>
+      </property>
+      <property name="single-workspace-mode" type="bool" value="true"/>
+      <property name="single-workspace-number" type="int" value="0"/>
+    </property>
+    <property name="desktop-icons" type="empty">
+      <property name="file-icons" type="empty">
+        <property name="show-filesystem" type="bool" value="false"/>
+        <property name="show-home" type="bool" value="false"/>
+        <property name="show-trash" type="bool" value="false"/>
+        <property name="show-removable" type="bool" value="false"/>
+      </property>
+    </property>
+    <property name="last" type="empty">
+      <property name="window-width" type="int" value="649"/>
+      <property name="window-height" type="int" value="522"/>
+    </property>
+  </channel>
+EOF
+
 #--- Desktop files
 ln -sf /usr/share/applications/exo-terminal-emulator.desktop ~/.config/xfce4/panel/launcher-2/exo-terminal-emulator.desktop
 ln -sf /usr/share/applications/kali-wireshark.desktop        ~/.config/xfce4/panel/launcher-4/kali-wireshark.desktop
@@ -795,6 +947,7 @@ sed -i 's/LastShowHidden=.*/LastShowHidden=TRUE/' "${file}" 2>/dev/null \
 
 ##### Configure GNOME terminal   Note: need to restart xserver for effect
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring GNOME ${GREEN}terminal${RESET} ~ CLI interface"
+apt install gconf2 gconf-service -y
 gconftool-2 -t bool -s /apps/gnome-terminal/profiles/Default/scrollback_unlimited true
 gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_type transparent
 gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_darkness 0.85611499999999996
@@ -1757,6 +1910,8 @@ timeout 300 curl --progress -k -L -f "https://atom.io/download/deb" > /tmp/atom.
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading atom.deb" 1>&2
 if [ -e /tmp/atom.deb ]; then
   dpkg -i /tmp/atom.deb
+  apm install minimap
+  apm install atom-sublime-monokai-syntax
   #--- Create config file
   mkdir -p ~/.atom/
   file=~/.atom/config.cson
@@ -1764,13 +1919,19 @@ if [ -e /tmp/atom.deb ]; then
     echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
   else
     cat <<EOF > "${file}"
-"*":
-  welcome:
-    showOnStartup: false
-  core:
-    disabledPackages: [
-      "metrics"
-    ]
+    "*":
+      core:
+        disabledPackages: [
+          "metrics"
+        ]
+        telemetryConsent: "no"
+        themes: [
+          "atom-dark-ui"
+          "atom-sublime-monokai-syntax"
+        ]
+      minimap: {}
+      welcome:
+        showOnStartup: false
 EOF
   fi
   #--- Add to panel (GNOME)
@@ -2208,7 +2369,7 @@ apt -y -qq install filezilla \
 timeout 5 filezilla >/dev/null 2>&1     # Start and kill. Files needed for first time run
 mkdir -p ~/.config/filezilla/
 file=~/.config/filezilla/filezilla.xml; [ -e "${file}" ] && cp -n $file{,.bkup}
-[ ! -e "${file}" ] && cat <<EOF> "${file}"
+[ ! -e "${file}" ] && cat <<EOF > "${file}"
 <?xml version="1.0" encoding="UTF-8"?>
 <FileZilla3 version="3.15.0.2" platform="*nix">
   <Settings>
@@ -2286,7 +2447,7 @@ apt -y -qq install wafw00f \
 apt -y -qq install aircrack-ng \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Setup hardware database
-(timeout 600 airodump-ng-oui-update 2>/dev/null) 
+(timeout 600 airodump-ng-oui-update 2>/dev/null)
 #--- Setup alias
 file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
@@ -2957,8 +3118,8 @@ apt -y -qq install bdfproxy \
 
 ##### Install backbox-anonymous script
 #(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Backbox's Tor Redirection Script${RESET}"
-#apt -y qq install tor \ 
-#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2 
+#apt -y qq install tor \
+#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #chmod 755 /opt/os-scripts-git/backbox-anonymous
 #mv /opt/os-scripts-git/backbox-anonymous /usr/bin/backbox-anonymous
 # modify tor config file
@@ -3005,13 +3166,13 @@ apt -y -qq install wordlists \
 [ -e /usr/share/seclists ] \
   && ln -sf /usr/share/seclists /usr/share/wordlists/seclists
 
-  
+
 ##### Install fuzzdb
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}fuzzdb${RESET} ~ fuzzing attack payloads"
 git clone -q -b master https://github.com/fuzzdb-project/fuzzdb.git /opt/fuzzdb-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 
-  
+
  ##### Update wordlists
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Updating ${GREEN}wordlists${RESET} ~ collection of wordlists"
 apt -y -qq install wordlists curl \
@@ -3295,7 +3456,7 @@ EOF
 chmod +x "${file}"
 
 
-##### Install xprobe - fingerprinting 
+##### Install xprobe - fingerprinting
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}xprobe${RESET} ~ OS fingerprinting"
 apt -y -qq install xprobe \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -3634,7 +3795,7 @@ pushd /opt/aquatone-git/ >/dev/null
 git pull -q
 popd >/dev/null
 
-##### theZoo - malware repository for use cases 
+##### theZoo - malware repository for use cases
 #(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Malware Zoo ${RESET}"
 #git clone -q https://github.com/ytisf/theZoo /opt/theZoo-git/ \
 #  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -3673,7 +3834,7 @@ ln -s /opt/nmap-vulners-git/vulners.nse /usr/share/nmap/scripts/vulners.nse
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Arachni webapp scanner ${RESET}"
 apt -y -qq install arachni \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-  
+
 ##### Redsnarf  - currently has issues with python scripting  https://github.com/nccgroup/redsnarf/issues/13
 #git clone -q https://github.com/nccgroup/redsnarf /opt/redsnarf-git/ \
 #  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -3720,10 +3881,10 @@ apt-mark hold burpsuite
 ##### Kali hardening, referencing CIS benchmark that won't break / hamstring Kali functionality
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Hardening system now ${GREEN}HARDEN HARDEN HARDEN ${RESET} ${GREEN}${RESET}"
 
-##### unattended upgrades 
+##### unattended upgrades
 apt -y -qq install unattended-upgrades apt-listchanges \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-  
+
 # 3.2 /boot/grub/grub.cfg chmod 400
 chmod 400 /boot/grub/grub.cfg
 
@@ -3731,7 +3892,7 @@ chmod 400 /boot/grub/grub.cfg
 sysctl -w net.ipv4.ip_forward=0 > /dev/null
 sysctl -w net.ipv4.conf.all.accept_redirects=0 > /dev/null
 sysctl -w net.ipv4.conf.all.accept_source_route=0 > /dev/null
-sysctl -w net.ipv4.conf.all.log_martians=1 > /dev/null 
+sysctl -w net.ipv4.conf.all.log_martians=1 > /dev/null
 sysctl -w net.ipv4.conf.default.accept_redirects=0 > /dev/null
 sysctl -w net.ipv4.conf.default.accept_source_route=0 > /dev/null
 sysctl -w net.ipv4.conf.default.log_martians=1 > /dev/null
@@ -3759,22 +3920,22 @@ sysctl -w kernel.panic=60 > /dev/null
 sysctl -w kernel.panic_on_oops=60 > /dev/null
 sysctl -w kernel.perf_event_paranoid=2 > /dev/null
 
-# 7.3.3 ipv6 disable waived 
+# 7.3.3 ipv6 disable waived
 
 # 8.1.2 auditd configured
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}auditd ${RESET}"
 apt -y -qq install auditd \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-  
+
 curl https://raw.githubusercontent.com/major/cis-rhel-ansible/master/roles/cis/files/etc/audit/audit.rules > /etc/audit/audit.rules
-  
+
 # 8.1.15 all the addition of rules for /etc/audit/audit.rules
 
 # 8.2.5 syslog-ng setting --> install and config
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}syslog-ng ${RESET}"
 apt -y -qq install syslog-ng \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-  
+
 # 8.3.2 tripwire usage
 
 # 9.1.7 /etc/cron.d chmod 700 (same applies for monthly weekly daily hourly) and chmod 600 for crontab
@@ -3823,7 +3984,7 @@ echo "Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@op
 echo "MACs hmac-sha2-512,hmac-sha2-256" >> /etc/ssh/sshd_config
 echo "KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1" >> /etc/ssh/sshd_config
 
-# 9.3.14 banner on /etc/ssh/sshd_config 
+# 9.3.14 banner on /etc/ssh/sshd_config
 sed -i 's/^#Banner none/Banner \/etc\/motd/g' "${file}"
 
 # 10.2 /bin/false for admin accounts
