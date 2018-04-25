@@ -1,6 +1,6 @@
 #!/bin/bash
 #-Metadata----------------------------------------------------#
-#  Filename: kali-rolling.sh             (Update: 2018-01-29) #
+#  Filename: kali-rolling.sh             (Update: 2018-04-28) #
 #-Info--------------------------------------------------------#
 #  Personal post-install script for Kali Linux Rolling        #
 #-Author(s)---------------------------------------------------#
@@ -24,8 +24,8 @@
 #    -timezone <value> = Change the timezone location         #
 #                                                             #
 #  e.g. # bash kali-rolling.sh  -burp -openvas -keyboard gb   #
-# 															  #
-#        ** This script is repurposed for Sp3nx0r_. **        #
+# 															                              #
+#        ** This script is repurposed for ib0ax. **           #
 #         ** EDIT this to meet _YOUR_ requirements! **        #
 #-------------------------------------------------------------#
 
@@ -107,9 +107,6 @@ while [[ "${#}" -gt 0 && ."${1}" == .-* ]]; do
    esac
 done
 
-burpFree=True;
-##### Sp3nx0r forgets, just always install
-
 ##### Check user inputs
 if [[ -n "${timezone}" && ! -f "/usr/share/zoneinfo/${timezone}" ]]; then
   echo -e ' '${RED}'[!]'${RESET}" Looks like the ${RED}timezone '${timezone}'${RESET} is incorrect/not supported (Example: ${BOLD}Europe/London${RESET})" 1>&2
@@ -158,7 +155,7 @@ if [[ $(which gnome-shell) ]]; then
 
   ##### Disable its auto notification package updater
   (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Disabling GNOME's ${GREEN}notification package updater${RESET} service ~ in case it runs during this script"
-#  export DISPLAY=:0.0
+  #export DISPLAY=:0.0
   timeout 5 killall -w /usr/lib/apt/methods/http >/dev/null 2>&1
 
 
@@ -182,10 +179,6 @@ if [[ "$?" -ne 0 ]]; then
   echo -e ' '${RED}'[!]'${RESET}" Will try and use ${YELLOW}DHCP${RESET} to 'fix' the issue" 1>&2
   chattr -i /etc/resolv.conf 2>/dev/null
   dhclient -r
-  #--- Second interface causing issues?
-  ip addr show eth1 &>/dev/null
-  [[ "$?" == 0 ]] \
-    && route delete default gw 192.168.155.1 2>/dev/null
   #--- Request a new IP
   dhclient
   dhclient eth0 2>/dev/null
@@ -237,14 +230,14 @@ sed -i '/kali/ s/^\( \|\t\|\)deb cdrom/#deb cdrom/g' "${file}"
 #--- incase we were interrupted
 dpkg --configure -a
 #--- Update
-apt-get update && apt-get upgrade -y
-#if [[ "$?" -ne 0 ]]; then
-#  echo -e ' '${RED}'[!]'${RESET}" There was an ${RED}issue accessing network #repositories${RESET}" 1>&2
-#  echo -e " ${YELLOW}[i]${RESET} Are the remote network repositories ${YELLOW}#currently being sync'd${RESET}?"
-#  echo -e " ${YELLOW}[i]${RESET} Here is ${BOLD}YOUR${RESET} local network ${BOLD}#repository${RESET} information (Geo-IP based):\n"
-#  curl -sI http://http.kali.org/README
-#  exit 1
-#fi
+apt update && apt full-upgrade -y
+if [[ "$?" -ne 0 ]]; then
+  echo -e ' '${RED}'[!]'${RESET}" There was an ${RED}issue accessing network #repositories${RESET}" 1>&2
+  echo -e " ${YELLOW}[i]${RESET} Are the remote network repositories ${YELLOW}#currently being sync'd${RESET}?"
+  echo -e " ${YELLOW}[i]${RESET} Here is ${BOLD}YOUR${RESET} local network ${BOLD}#repository${RESET} information (Geo-IP based):\n"
+  curl -sI http://http.kali.org/README
+  exit 1
+fi
 
 
 ##### Check to see if Kali is in a VM. If so, install "Virtual Machine Addons/Tools" for a "better" virtual experiment
@@ -278,28 +271,6 @@ elif (dmidecode | grep -iq virtualbox); then
   apt -y -qq install virtualbox-guest-x11 \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 fi
-
-
-##### Check to see if there is a second Ethernet card (if so, set an static IP address)
-#ip addr show eth1 &>/dev/null
-#if [[ "$?" == 0 ]]; then
-#  ##### Set a static IP address (192.168.155.175/24) on eth1
-#  (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Setting a ${GREEN}static IP address${RESET} (${BOLD}192.168.155.175/24${RESET}) on ${BOLD}eth1${RESET}"
-#  ip addr add 192.168.155.175/24 dev eth1 2>/dev/null
-#  route delete default gw 192.168.155.1 2>/dev/null
-#  file=/etc/network/interfaces.d/eth1.cfg; [ -e "${file}" ] && cp -n $file{,.bkup}
-#  grep -q '^iface eth1 inet static' "${file}" 2>/dev/null \
-#    || cat <<EOF > "${file}"
-#auto eth1
-#iface eth1 inet static
-#    address 192.168.155.175
-#    netmask 255.255.255.0
-#    gateway 192.168.155.1
-#    post-up route delete default gw 192.168.155.1
-#EOF
-#else
-#  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping eth1${RESET} (missing nic)..." 1>&2
-#fi
 
 
 ##### Set static & protecting DNS name servers.   Note: May cause issues with forced values (e.g. captive portals etc)
@@ -377,8 +348,8 @@ if [[ "${_TMP}" -gt 1 ]]; then
   if [[ -z "${TMP}" ]]; then
     echo -e '\n '${RED}'[!]'${RESET}' You are '${RED}'not using the latest kernel'${RESET} 1>&2
     echo -e " ${YELLOW}[i]${RESET} You have it ${YELLOW}downloaded${RESET} & installed, just ${YELLOW}not USING IT${RESET}"
-    #echo -e "\n ${YELLOW}[i]${RESET} You ${YELLOW}NEED to REBOOT${RESET}, before re-running this script"
-    #exit 1
+    echo -e "\n ${YELLOW}[i]${RESET} You ${YELLOW}NEED to REBOOT${RESET}, before re-running this script"
+    exit 1
     sleep 30s
   else
     echo -e " ${YELLOW}[i]${RESET} ${YELLOW}You're using the latest kernel${RESET} (Good to continue)"
@@ -394,7 +365,7 @@ if [[ $? -ne 0 ]]; then
   echo -e ' '${RED}'[!]'${RESET}" There was an ${RED}issue installing kernel headers${RESET}" 1>&2
   echo -e " ${YELLOW}[i]${RESET} Are you ${YELLOW}USING${RESET} the ${YELLOW}latest kernel${RESET}?"
   echo -e " ${YELLOW}[i]${RESET} ${YELLOW}Reboot${RESET} your machine"
-  #exit 1
+  exit 1
   sleep 30s
 fi
 
@@ -415,6 +386,10 @@ pactl set-sink-mute 0 0
 pactl set-sink-volume 0 25%
 
 
+##### Create Black pixel for background
+echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4gQYCCYSyQFqTQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAADElEQVQI12NgYGAAAAAEAAEnNCcKAAAAAElFTkSuQmCC" | base64 -d > /usr/share/images/desktop-base/black.png
+
+
 ##### Configure GRUB
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}GRUB${RESET} ~ boot manager"
 grubTimeout=5
@@ -423,6 +398,7 @@ file=/etc/default/grub; [ -e "${file}" ] && cp -n $file{,.bkup}
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT='${grubTimeout}'/' "${file}"                           # Time out (lower if in a virtual machine, else possible dual booting)
 sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="vga=0x0318"/' "${file}"   # TTY resolution
 sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX_="audit=1"/' "${file}"   # grub hardening
+echo 'GRUB_BACKGROUND="/usr/share/images/desktop-base/black.png"' >> "${file}" # grub black background
 update-grub
 
 
@@ -440,12 +416,15 @@ if [[ $(which gnome-shell) ]]; then
   ##### Configure GNOME 3
   (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}GNOME 3${RESET} ~ desktop environment"
 #  export DISPLAY=:0.0
+  #-- Gnome black walpaper and LockScreen
+  gsettings set org.gnome.desktop.background picture-uri file:///usr/share/images/desktop-base/black.png
+  gsettings set org.gnome.desktop.screensaver picture-uri file:///usr/share/images/desktop-base/black.png
   #-- Gnome Extension - Dash Dock (the toolbar with all the icons)
   gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true      # Set dock to use the full height
   gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'   # Set dock to the right
   gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true         # Set dock to be always visible
   gsettings set org.gnome.shell favorite-apps \
-    "['gnome-terminal.desktop', 'org.gnome.Nautilus.desktop', 'kali-wireshark.desktop', 'firefox-esr.desktop', 'kali-burpsuite.desktop', 'kali-msfconsole.desktop', 'gedit.desktop']"
+    "['gnome-terminal.desktop', 'org.gnome.Nautilus.desktop', 'kali-wireshark.desktop', 'firefox-esr.desktop', 'kali-burpsuite.desktop', 'gedit.desktop']"
   #-- Gnome Extension - Alternate-tab (So it doesn't group the same windows up)
   GNOME_EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions | sed 's_^.\(.*\).$_\1_')
   echo "${GNOME_EXTENSIONS}" | grep -q "alternate-tab@gnome-shell-extensions.gcampax.github.com" \
@@ -460,7 +439,7 @@ if [[ $(which gnome-shell) ]]; then
   #--- Top bar
   gsettings set org.gnome.desktop.interface clock-show-date true                           # Show date next to time in the top tool bar
   #--- Keyboard short-cuts
-  (dmidecode | grep -iq virtual) && gsettings set org.gnome.mutter overlay-key "Super_R"   # Change 'super' key to right side (rather than left key), if in a VM
+  #(dmidecode | grep -iq virtual) && gsettings set org.gnome.mutter overlay-key "Super_R"   # Change 'super' key to right side (rather than left key), if in a VM
   #--- Hide desktop icon
   dconf write /org/gnome/nautilus/desktop/computer-icon-visible false
 else
@@ -805,15 +784,15 @@ xfconf-query -n -c xfce4-panel -p /plugins/plugin-16/items \
 #--- clock
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-17/show-frame -t bool -s false
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-17/mode -t int -s 2
-xfconf-query -n -c xfce4-panel -p /plugins/plugin-17/digital-format -t string -s "%R, %Y-%m-%d"
+xfconf-query -n -c xfce4-panel -p /plugins/plugin-17/digital-format -t string -s "%R, %d-%m-%Y"
 #--- pager / workspace
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-19/miniature-view -t bool -s true
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-19/rows -t int -s 1
 xfconf-query -n -c xfwm4 -p /general/workspace_count -t int -s 3
 #--- Theme options
-xfconf-query -n -c xsettings -p /Net/ThemeName -s "Kali-X"
-xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali"
-xfconf-query -n -c xsettings -p /Gtk/MenuImages -t bool -s true
+#xfconf-query -n -c xsettings -p /Net/ThemeName -s "Kali-X"
+#xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali"
+#xfconf-query -n -c xsettings -p /Gtk/MenuImages -t bool -s true
 xfconf-query -n -c xfce4-panel -p /plugins/plugin-1/button-icon -t string -s "kali-menu"
 #--- Window management
 xfconf-query -n -c xfwm4 -p /general/snap_to_border -t bool -s true
@@ -882,16 +861,16 @@ update-alternatives --set x-session-manager /usr/bin/xfce4-session   #update-alt
 
 
 ##### Cosmetics (themes & wallpapers)
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cosmetics${RESET}${RESET} ~ Giving it a personal touch"
+#(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cosmetics${RESET}${RESET} ~ Giving it a personal touch"
 #export DISPLAY=:0.0
 #--- axiom / axiomd (May 18 2010) XFCE4 theme ~ http://xfce-look.org/content/show.php/axiom+xfwm?content=90145
-mkdir -p ~/.themes/
-timeout 300 curl --progress -k -L -f "https://www.opendesktop.org/p/1016679/startdownload?file_id=1461767736&file_name=90145-axiom.tar.gz&file_type=application/x-gzip&file_size=134386&url=https%3A%2F%2Fdl.opendesktop.org%2Fapi%2Ffiles%2Fdownloadfile%2Fid%2F1461767736%2Fs%2F4df57f1e567be7791fb66dcbea784f30%2Ft%2F1517860512%2Fu%2F%2F90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
-tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
-xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
-xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
+#mkdir -p ~/.themes/
+#timeout 300 curl --progress -k -L -f "https://www.opendesktop.org/p/1016679/startdownload?file_id=1461767736&file_name=90145-axiom.tar.gz&file_type=application/x-gzip&file_size=134386&url=https%3A%2F%2Fdl.opendesktop.org%2Fapi%2Ffiles%2Fdownloadfile%2Fid%2F1461767736%2Fs%2F4df57f1e567be7791fb66dcbea784f30%2Ft%2F1517860512%2Fu%2F%2F90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
+#  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
+#tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
+#xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
+#xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
+#/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
 ##### Configure file   Note: need to restart xserver for effect
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}file${RESET} (Nautilus/Thunar) ~ GUI file system navigation"
 #--- Settings
@@ -1328,8 +1307,8 @@ source "${file}" || source ~/.zshrc
 
 ##### Configure screen ~ if possible, use tmux instead!
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}screen${RESET} ~ multiplex virtual consoles"
-#apt -y -qq install screen \
-#  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+apt -y -qq install screen \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Configure screen
 file=~/.screenrc; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
@@ -1348,7 +1327,7 @@ defscrollback 1000
 ## Hardstatus is a bar of text that is visible in all screens
 hardstatus on
 hardstatus alwayslastline
-hardstatus string '%{gk}%{G}%H %{g}[%{Y}%l%{g}] %= %{wk}%?%-w%?%{=b kR}(%{W}%n %t%?(%u)%?%{=b kR})%{= kw}%?%+w%?%?%= %{g} %{Y} %Y-%m-%d %C%a %{W}'
+hardstatus string '%{gk}%{G}%H %{g}[%{Y}%l%{g}] %= %{wk}%?%-w%?%{=b kR}(%{W}%n %t%?(%u)%?%{=b kR})%{= kw}%?%+w%?%?%= %{g} %{Y} %d-%m-%Y %C%a %{W}'
 
 ## Title bar
 termcapinfo xterm ti@:te@
@@ -1405,12 +1384,12 @@ grep -q '^set pastetoggle=<F9>' "${file}" 2>/dev/null \
 grep -q '^:command Q q' "${file}" 2>/dev/null \
   || echo -e ':command Q q' >> "${file}"                                                                 # Fix stupid typo I always make
 #--- Set as default editor
-export EDITOR="nano"   #update-alternatives --config editor
+export EDITOR="vim"   #update-alternatives --config editor
 file=/etc/bash.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
 grep -q '^EDITOR' "${file}" 2>/dev/null \
-  || echo 'EDITOR="nano"' >> "${file}"
-git config --global core.editor "nano"
+  || echo 'EDITOR="vim"' >> "${file}"
+git config --global core.editor "vim"
 #--- Set as default mergetool
 git config --global merge.tool vimdiff
 git config --global merge.conflictstyle diff3
@@ -1422,7 +1401,7 @@ git config --global mergetool.prompt false
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Set as default editor
-git config --global core.editor "nano"
+git config --global core.editor "vim"
 #--- Set as default mergetool
 git config --global merge.tool vimdiff
 git config --global merge.conflictstyle diff3
@@ -1460,7 +1439,7 @@ sed -i 's/^.*extensions.https_everywhere._observatory.popup_shown.*/user_pref("e
   || echo 'user_pref("extensions.https_everywhere._observatory.popup_shown", true);' >> "${file}"
 sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.ports.banned.override", "1-65455");' "${file}" 2>/dev/null \
   || echo 'user_pref("network.security.ports.banned.override", "1-65455");' >> "${file}"
-#--- Replace bookmarks (base: http://pentest-bookmarks.googlecode.com)
+#--- Replace bookmarks (base: https://code.google.com/archive/p/pentest-bookmarks/)
 file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -print -quit)"bookmarks.html"
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
@@ -1509,11 +1488,11 @@ ffpath="$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -mindepth 0 -type d -n
   && echo -e ' '${RED}'[!]'${RESET}" Couldn't find Firefox folder" 1>&2
 mkdir -p "${ffpath}/"
 #--- plug-n-hack
-#curl --progress -k -L -f "https://github.com/mozmark/ringleader/blob/master/fx_pnh.xpi?raw=true????????????????"  \
-#  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'plug-n-hack' 1>&2
+curl --progress -k -L -f "https://github.com/mozmark/ringleader/blob/master/fx_pnh.xpi?raw=true????????????????"  \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'plug-n-hack'" 1>&2
 #--- HttpFox
-#curl --progress -k -L -f "https://addons.mozilla.org/en-GB/firefox/addon/httpfox/??????????????"  \
-#  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HttpFox' 1>&2
+curl --progress -k -L -f "https://addons.mozilla.org/en-GB/firefox/addon/httpfox/??????????????"  \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HttpFox'" 1>&2
 #--- SQLite Manager
 echo -n '[1/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/SQLiteManager@mrinalkant.blogspot.com.xpi" \
@@ -1772,11 +1751,6 @@ fi
 apt -y -qq install metasploit-framework \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p ~/.msf4/modules/{auxiliary,exploits,payloads,post}/
-#--- ASCII art
-#export GOCOW=1   # Always a cow logo ;)   Others: THISISHALLOWEEN (Halloween), APRILFOOLSPONIES (My Little Pony)
-#file=~/.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}
-#([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
-#grep -q '^GOCOW' "${file}" 2>/dev/null || echo 'GOCOW=1' >> "${file}"
 #--- Fix any port issues
 file=$(find /etc/postgresql/*/main/ -maxdepth 1 -type f -name postgresql.conf -print -quit);
 [ -e "${file}" ] && cp -n $file{,.bkup}
@@ -2244,7 +2218,7 @@ apt -y -qq install asciinema \
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}shutter${RESET} ~ GUI static screen capture"
 apt -y -qq install shutter \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-
+f
 
 ##### Install psmisc ~ allows for 'killall command' to be used
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}psmisc${RESET} ~ suite to help with running processes"
