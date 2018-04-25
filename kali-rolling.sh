@@ -2218,7 +2218,7 @@ apt -y -qq install asciinema \
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}shutter${RESET} ~ GUI static screen capture"
 apt -y -qq install shutter \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-f
+
 
 ##### Install psmisc ~ allows for 'killall command' to be used
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}psmisc${RESET} ~ suite to help with running processes"
@@ -3751,7 +3751,7 @@ sudo docker run hello-world
 sudo groupadd docker
 sudo usermod -aG docker $USER
 # configure Docker to start on boot
-sudo systemctl enable docker
+sudo systemctl disable docker
 
 ##### AWS Shell API
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}AWS Shell ${RESET}"
@@ -3839,6 +3839,45 @@ git clone -q https://github.com/foospidy/DbDat /opt/DbDat-git/ \
 pushd /opt/DbDat-git/ >/dev/null
 git pull -q
 popd >/dev/null
+
+
+#radare2 - unix-like reverse engineering framework
+(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}#radare2 - unix-like reverse engineering framework ${RESET}"
+git clone -q https://github.com/radare/radare2.git /opt/radare2-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/radare2-git/ >/dev/null
+git pull -q
+popd >/dev/null
+bash /opt/radare2-git/sys/install.sh
+file=~/.radare2rc
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  # Show comments at right of disassembly
+  e asm.cmtright=true
+
+  # Shows pseudocode in disassembly. Eg mov eax, str.ok = > eax = str.ok
+  e asm.pseudo = true
+  # Display stack and register values on top of disasembly view (visual mode)
+  e cmd.stack = true
+
+  # Use UTF-8 to show cool arrows that do not look like crap :)
+  e scr.utf8 = true
+  e scr.utf8.curvy = true
+
+  #ESIL EMU
+  e asm.emu=true
+  e asm.esil = true
+
+  # Solarized theme
+  eco solarized
+
+  # Sanbox settings
+  e cfg.sandbox=false
+
+  e asm.describe = true
+  e cfg.bigendian=true
+EOF
+
 
 ##### Scout2 https://github.com/nccgroup/Scout2 - AWS CSP auditing platform
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Scout2 - AWS CSP auditing platform ${RESET}"
@@ -3969,9 +4008,9 @@ umask 077 /etc/profile.d
 umask 077 /etc/profile
 
 # 99.2 disable usb devices
-(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Disable USB devices ${GREEN} ${RESET}"
-touch /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
-echo ACTION=="add", SUBSYSTEMS=="usb", TEST=="authorized_default", ATTR{authorized_default}="0" >> /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
+#(( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) Disable USB devices ${GREEN} ${RESET}"
+#touch /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
+#echo ACTION=="add", SUBSYSTEMS=="usb", TEST=="authorized_default", ATTR{authorized_default}="0" >> /etc/udev/rules.d/10-CIS_99.2_usb_devices.sh
 
 ##### Clean the system
 (( STAGE++ )); echo -e "\n\n ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cleaning${RESET} the system"
